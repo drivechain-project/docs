@@ -13,7 +13,13 @@ Keypairs in this example:
 2,"1BEqHeMMMQ9pYbUDK2Ym4MqerjR9DoQp9U","L37q5tUDGHHiA8hY9VBEnU2Pj6G2cjh3zzHoDa8mHQvqu58BY9ju"
 3,"1Q9YoreXAJVfNpxdKrMt1rsyAAVK85fbg2","L1huLYEDMSxR9JAbvCStfsjuFYcSWfcsCh3f2VMTPpYitX2i9GnU"
 
-* Sidechain Address: {side}
+* Sidechain Address: 4PzhhUPpXDHifBsAtoh1E9S2wVx3u9ZPG7   
+* "scriptPubKey": {
+    "asm": "057461626c65057461626c65e007e007e803f401 OP_SIDECHAIN",
+    "hex": "14057461626c65057461626c65e007e007e803f401c0",
+    "type": "nonstandard"
+  },
+
 
 4,"12TvhiV6Hjveh5X243Pb24BiitcDZtaT5U","L36DwrD1f4fcXSf8tAuUsahH21hWqt9BRDH4v4GS4NavsYJofw14"
 5,"1GbQLhfCgXr9YXs1Kxz9NSEWae4m1dm8yX","L3SyrXjxrkWc3T6GQkrNv5vsgBgUQpafmsUDECLo5ZLuXzd8nvxh"
@@ -30,7 +36,7 @@ Table of Work:
 |--------|----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|-----------------------------------------------------------|
 | 1      | Keypairs                         | See Above                                                                                                                                                                                                                                                                                                                                           | N/A     | 70% Sidechain address should have different prefix ("4"). |
 | 2      | Create Sidechain                 | [1] [m] Create a sidechain object (container, btc address)... [2] [m] Miner Database, which keeps track of sidechains and their parameters.                                                                                                                                           | Patrick | Complete                                                  |
-| 3      | Deposit to Sidechain             | [1] [m] Send 0.2 BTC from 1CAq... to {side}, Send 0.3 BTC from 1BEq... to {side}, Send 0.4 BTC from 1Q9Y.. to {side}. [2] These transactions must be discovered by the MinerDB (step 2), and they must also encode a unique address. [3] For example, the first transaction (0.2 BTC) must somehow encode the value "12TvhiV6Hjveh5X243Pb24BiitcDZtaT5U". | ?       | Nothing Done                                              |
+| 3      | Deposit to Sidechain             | [1] [m] Send 0.2 BTC from 1CAq... to 4Pzh..., Send 0.3 BTC from 1BEq... to 4Pzh..., Send 0.4 BTC from 1Q9Y.. to 4Pzh.... [2] These transactions must be discovered by the MinerDB (step 2), and they must also encode a unique address. [3] For example, the first transaction (0.2 BTC) must somehow encode the value "12TvhiV6Hjveh5X243Pb24BiitcDZtaT5U". | ?       | Nothing Done                                              |
 | 4      | Receive                          | [1] 10 block waiting period (dampen reorg effects). [2] [s] Watch mainchain for the txns in Step 3. Credit 0.2 BTC to 12Tv..., 0.3 to 1GbQ..., and 0.4 to 14Jk...                                                                                                                                                                                       | ?       | Nothing Done                                              |
 | 5      | Sidechain Game                   | [1] 0.3 BTC transfers from 1GbQ.. to 12Tv.. and this transfer is done in a novel way (impossible with Bitcoin). For example, rock paper scissors betting game.                                                                                                                                                                                        | ?       | Nothing Done - Low Priority                               |
 | 6      | Withdrawal Request               | [1] 12Tv wants to take 0.4 BTC from the sidechain to [m] 16Yw.. [2] 1Q9Y wants to take his 0.4 BTC back as well, to [m] 1PCM..                                                                                                                                                                                                                          | ?       | Nothing Done                                              |
