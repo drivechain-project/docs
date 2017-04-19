@@ -4,13 +4,13 @@ This is just a rough draft, there is much more to be added.
 
 ## Language used in Drivechains project:
 
-###`Mainchain`
+### `Mainchain`
 https://github.com/drivechain-project/bitcoin/tree/mainchain
 
 The mainchain is Bitcoin, with added functionality to support Drivechains. The work that is intended to
 be merged upstream all goes into the mainchain branch of the Bitcoin fork in this repository.
 
-###`Sidechain`
+### `Sidechain`
 https://github.com/drivechain-project/bitcoin/tree/sidechain
 
 The sidechain is a fork of Bitcoin, with added functionality to support the sidechain half of Drivechains.
@@ -18,23 +18,23 @@ None of the code in the sidechain repository should ever be merged into upstream
 heavy lifting and code that we wouldn't necessarily want in Bitcoin core, but is needed to support Drivechains
 goes here.
 
-###`SCDB`
+### `SCDB`
 `SCDB` is short for Sidechain Database. The SCDB primarily keeps track of the verifications
 for each sidechain during the current Tau.
 
-###`State Script`
+### `State Script`
 `State Scripts` are created and interpreted by the SCDB in order to represent the verification
 state of active Sidechain WT^(s). State scripts contain hex values like opcodes that tell the SCDB
 whether a WT^ is being verified or rejected, and to delimit different Sidechains and their WT^(s).
 
-###`wt`
+### `wt`
 `wt` is the name given to an individual withdrawal attempt from the sidechain back to the mainchain.
 
-###`WT^`
+### `WT^`
 `WT^` is the name given to a transaction created by the sidechain that joins pending wt's
 into a single transaction that can be verified by the mainchain.
 
-###`Tau` &tau; 
+### `Tau` &tau; 
 `Tau` is used to represent a single round / period of waiting and verification for an individual sidechain.
 The Tau of the testing sidechain (SIDECHAIN_TEST) is 300 for example. The Tau is calculated by the 
 sidechain.GetTau() function in the following way: `return (sidechain.nWaitPeriod + sidechain.nVerificationPeriod);`
