@@ -34,6 +34,10 @@ whether a WT^ is being verified or rejected, and to delimit different Sidechains
 `WT^` is the name given to a transaction created by the sidechain that joins pending wt's
 into a single transaction that can be verified by the mainchain.
 
+### `B-WT^`
+`B-WT^` is the blinded version (no inputs) of a WT^ that is voted on. A `WT^` can be verified as a
+decendent of a certain `B-WT^` after approval by blinding the transaction again and checking the hash.
+
 ### `Tau` &tau; 
 `Tau` is used to represent a single round / period of waiting and verification for an individual sidechain.
 The Tau of the testing sidechain (SIDECHAIN_TEST) is 300 for example. The Tau is calculated by the 
