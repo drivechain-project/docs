@@ -51,7 +51,7 @@ At the beginning of the next Tau, the SCDB is blank for that sidechain until a n
 is amnesic to previous Tau periods.
 
 ## SCDB numbers:
-### Maximum number of total sidechains:
+### Maximum number of valid sidechains:
 Each sidechain is assigned a unique number, represented by an 8 bit unsigned integer.
 This limits the maximum number of sidechains to 256.
 
@@ -61,8 +61,14 @@ Each WT^ added to a state script takes up around 2 bytes. The max number of WT^s
 is 3, so a maximum of 6 bytes will be used per sidechain. Bitcoin will reject a script if it
 is larger than 10,000 bytes, meaning up to ~1,666 WT^s on ~555 Sidechains can be represented.
 
-Size of the State script if the three testing sidechains have 3 WT^s each (the maximum):
-20 KB
+### Sizes of example state scripts used in SidechainDB unit tests:
+WT^ position test script: 20 bytes
+
+Populated test script: 8 bytes
+
+Random number of WT^(s) per sidechain test: 14 bytes
+
+Maximum capacity for each sidechain test: 20 bytes
 
 ## Known issues and improvements to be made:
 Please see https://github.com/drivechain-project/bitcoin/issues
