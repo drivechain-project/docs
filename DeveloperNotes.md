@@ -13,9 +13,7 @@ be merged upstream all goes into the mainchain branch of the Bitcoin fork in thi
 https://github.com/drivechain-project/bitcoin/tree/sidechainBMM
 
 The sidechain is a fork of Bitcoin, with added functionality to support the sidechain half of Drivechains.
-None of the code in the sidechain repository should ever be merged into upstream bitcoin. Some of the 
-heavy lifting and code that we wouldn't necessarily want in Bitcoin core, but is needed to support Drivechains
-goes here.
+This code doesn't ever need to be merged into Bitcoin upstream.
 
 ### `BMM`
 'BMM' stands for blind merged mining which is how Drivechains use the PoW of the Bitcoin mainchain. Refer
