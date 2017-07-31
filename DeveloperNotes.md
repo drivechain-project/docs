@@ -4,13 +4,13 @@ This is just a rough draft, there is much more to be added.
 ## Language used in Drivechains project:
 
 ### `Mainchain`
-https://github.com/drivechain-project/bitcoin/tree/mainchain
+https://github.com/drivechain-project/bitcoin/tree/mainchainBMM
 
 The mainchain is Bitcoin, with added functionality to support Drivechains. The work that is intended to
 be merged upstream all goes into the mainchain branch of the Bitcoin fork in this repository.
 
 ### `Sidechain`
-https://github.com/drivechain-project/bitcoin/tree/sidechain
+https://github.com/drivechain-project/bitcoin/tree/sidechainBMM
 
 The sidechain is a fork of Bitcoin, with added functionality to support the sidechain half of Drivechains.
 None of the code in the sidechain repository should ever be merged into upstream bitcoin. Some of the 
