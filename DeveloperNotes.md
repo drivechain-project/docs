@@ -1,7 +1,6 @@
 # Developer Notes
 This is just a rough draft, there is much more to be added.
 
-
 ## Language used in Drivechains project:
 
 ### `Mainchain`
@@ -18,14 +17,13 @@ None of the code in the sidechain repository should ever be merged into upstream
 heavy lifting and code that we wouldn't necessarily want in Bitcoin core, but is needed to support Drivechains
 goes here.
 
-### `SCDB`
-`SCDB` is short for Sidechain Database. The SCDB primarily keeps track of the verifications
-for each sidechain during the current Tau.
+### `BMM`
+'BMM' stands for blind merged mining which is how Drivechains use the PoW of the Bitcoin mainchain. Refer
+to http://www.truthcoin.info/blog/blind-merged-mining/ for more information.
 
-### `State Script`
-`State Scripts` are created and interpreted by the SCDB in order to represent the verification
-state of active Sidechain WT^(s). State scripts contain hex values like opcodes that tell the SCDB
-whether a WT^ is being verified or rejected, and to delimit different Sidechains and their WT^(s).
+### `SCDB`
+`SCDB` is short for Sidechain Database. The SCDB keeps track of the work score
+of WT^(s) for each sidechain during the current Tau as well as BMM linking data.
 
 ### `wt`
 `wt` is the name given to an individual withdrawal attempt from the sidechain back to the mainchain.
@@ -50,26 +48,20 @@ of a sidechain Tau, if a WT^ has been verified such that it has sufficient works
 At the beginning of the next Tau, the SCDB is blank for that sidechain until a new WT^ is shown to the miners. The SCDB 
 is amnesic to previous Tau periods.
 
-## SCDB numbers:
+## More information:
+
 ### Maximum number of valid sidechains:
 Each sidechain is assigned a unique number, represented by an 8 bit unsigned integer.
 This limits the maximum number of sidechains to 256.
 
-### State script size:
-The OP_RETURN and state script version prefix takes up 3 bytes.
-Each WT^ added to a state script takes up around 2 bytes. The max number of WT^s per Sidechain
-is 3, so a maximum of 6 bytes will be used per sidechain. Bitcoin will reject a script if it
-is larger than 10,000 bytes, meaning up to ~1,666 WT^s on ~555 Sidechains can be represented.
-
-### Sizes of example state scripts used in SidechainDB unit tests:
-WT^ position test script: 20 bytes
-
-Populated test script: 8 bytes
-
-Random number of WT^(s) per sidechain test: 14 bytes
-
-Maximum capacity for each sidechain test: 20 bytes
-
-## Known issues and improvements to be made:
+### Known issues and improvements to be made:
 Please see https://github.com/drivechain-project/bitcoin/issues
 and submit any new issues that you discover.
+
+### Useful links:
+http://www.drivechain.info/literature/index.html
+
+https://github.com/drivechain-project/
+
+https://bitcoin-hivemind.herokuapp.com/ (sidechains discussion slack channel)
+
