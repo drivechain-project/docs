@@ -31,8 +31,9 @@ of WT^(s) for each sidechain during the current Tau as well as BMM linking data.
 into a single transaction that can be verified by the mainchain.
 
 ### `B-WT^`
-`B-WT^` is the blinded version (no inputs) of a WT^ that is voted on. A `WT^` can be verified as a
-decendent of a certain `B-WT^` after approval by blinding the transaction again and checking the hash.
+`B-WT^` is the blinded version (no inputs) of a WT^ that is voted on. Once a B-WT^ has 
+sufficient workscore the WT^ with inputs will be created. The WT^ can be verified by 
+blinding it again.
 
 ### `Tau` &tau; 
 `Tau` is used to represent a single round / period of waiting and verification for an individual sidechain.
