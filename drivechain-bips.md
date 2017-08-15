@@ -1,9 +1,9 @@
 
 Drivechain Documentation
+===========================
 Paul Sztorc 
 August 15, 2017
 Document 1 of 3
-===========================
 
 Note from Paul: Double brackets "{{" and "}}" surround parts that are "unfinished".
 
@@ -43,17 +43,23 @@ To maintain the modularity of the two proposals, each individual proposal can re
 
 In other words, the "Hashrate Escrow" proposal [left side] would require a hash commitment of hash(itself, X) where X can take on any value. And the "Blind Merged-Mining" proposal [right side] would require a hash commitment of hash(Y, itself), where Y could take on any value. Thus they are fully separable.
 
-    {{ Or, we can store "Hashrate Escrow" and "BMM" hash commitments each in their own Coinbase TxOut. It doesn't matter very much. }}
+{{ Or, we can store "Hashrate Escrow" and "BMM" hash commitments each in their own Coinbase TxOut. It doesn't matter very much. }}
 
+
+Links
+======
+
+1. [Link to 1st BIP](https://github.com/drivechain-project/docs/blob/master/bip1-hashrate-escrow.md) -- Hashrate Escrow
+2. [Link to 2nd BIP](https://github.com/drivechain-project/docs/blob/master/bip2-blind-merged-mining.md) -- Blind Merged-Mining
 
 
 
 
  === END OF DOCUMENTATION ===
 
-=============
-TODO (meta)
-=============
+
+### TODO (meta)
+
 
 Plans for this document:
 
@@ -61,10 +67,5 @@ Plans for this document:
 2. Flesh out the "soft" sections ie "Motivation" etc
 3. Somehow reconcile this with more detailed descriptions (ie txdb.cpp [1] ?)
 
-
 [1]  https://github.com/bitcoin/bitcoin/blob/master/src/txdb.cpp
-
-
-This will eventually become two BIPs.
-
 

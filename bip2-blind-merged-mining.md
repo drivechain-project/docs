@@ -1,11 +1,11 @@
 Drivechain Documentation
+===========================
 Paul Sztorc 
 August 15, 2017
 Document 3 of 3
-===========================
+
 
 Note from Paul: Double brackets "{{" and "}}" surround parts that are "unfinished".
-
 
 
 Concept Two: Blind Merged-Mining
@@ -122,18 +122,18 @@ For the most recent X=4000 blocks, upgraded nodes will track:
         4aii. blockMod
 
 
-This results in D3, which might look something like: 
+This results in D3, which might look something like this: 
        
-         SC 1       SC 2       SC 3      
-         ----      ------     ------
-   1.   h*, 746   h*,   25    h*, 1156
-   2.   h*, 747   h*,   26    h*, 1157
-   3.   h*, 748   h*,   27    h*,  903
-   4.   h*, 749   h*,   28    h*,  904
-  ...
-3999.   h*, 744   h*, 4023    h*, 3487 
-4000.   h*, 745   h*, 4024    h*, 3488
-
+	   
+             SC 1       SC 2       SC 3      
+             ----      ------     ------
+       1.   h*, 746   h*,   25    h*, 1156
+       2.   h*, 747   h*,   26    h*, 1157
+       3.   h*, 748   h*,   27    h*,  903
+       4.   h*, 749   h*,   28    h*,  904
+      ...
+    3999.   h*, 744   h*, 4023    h*, 3487 
+    4000.   h*, 745   h*, 4024    h*, 3488
 
 
 #### New Validation Rules
@@ -145,6 +145,8 @@ Each mainchain node tracks, per sidechain, the last 4000 blockMods. Each *new* b
 
 
 ### OP CheckBribeVerify
+
+#### Purpose
 
 This section reappropriates an OP NOP, so as to allow miners to "sell" the act of mining a sidechain block. This allows all miners to benefit from sidechains equally -- even those which are unable to run burdensome sidechain nodes.
 
@@ -159,8 +161,11 @@ The goal is to construct a payment from Simon to Mary:
 
 {{ See https://lightning.network/  -- for info about how this is often done. }}
 
+#### Structure
 
 The TxOut in question would include three arguments: (h*, this_blocknumber, timeout).
+
+#### Mary vs Simon
 
 **Mary** would be able to spend it if she can prove two things:
 
@@ -171,13 +176,11 @@ The first is proved by using the linking data to show that a (h*,bM) pair exists
 
 In contrast, **Simon** is able to spend the txn (and recapture his money) if Mary goes some length of time (say, 500 blocks) without accomplishing what she said she would be able to accomplish.
 
+#### Notes / Improvements
+
 As usual, Simon and Mary can utilize the lightning network, such that their txns never needs to make it onto the chain, unless there is a dispute.
 
 To discourage Mary from locking up Simon's money in an inconvenient way, we could force Mary to also send a very small amount of her money into the transaction -- much less than she is being paid, but enough to reimburse Simon for the inconvenience of having his money locked away temporarily.
-
-
-
-
 
 
 
@@ -187,18 +190,19 @@ To discourage Mary from locking up Simon's money in an inconvenient way, we coul
 Header
 =======
 
-  BIP: ????
-  Layer: Consensus (soft fork)
-  Title: Blind Merged-Mining (Consensus layer)
-  Author: Paul Sztorc <truthcoin@gmail.com>
-          CryptAxe <cryptaxe@gmail.com>
-          Chris Stewart <chris@suredbits.com>
-  Comments-Summary: No comments yet.
-  Comments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-??????
-  Status: Draft
-  Type: Standards Track
-  Created: 2017-08-14
-  License: PD
+    BIP: ????
+    Layer: Consensus (soft fork)
+    Title: Blind Merged-Mining (Consensus layer)
+    Author: Paul Sztorc <truthcoin@gmail.com>
+            CryptAxe <cryptaxe@gmail.com>
+            Chris Stewart <chris@suredbits.com>
+    Comments-Summary: No comments yet.
+    Comments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-??????
+    Status: Draft
+    Type: Standards Track
+    Created: 2017-08-14
+    License: PD
+
 
 
 

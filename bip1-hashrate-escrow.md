@@ -1,11 +1,11 @@
 Drivechain Documentation
+===========================
 Paul Sztorc 
 August 15, 2017
 Document 2 of 3
-===========================
+
 
 Note from Paul: Double brackets "{{" and "}}" surround parts that are "unfinished".
-
 
 
 Concept One: Hashrate Escrow
@@ -21,19 +21,19 @@ One way to think of this is as a 2-of-3 escrow, where the 3rd party (who will ar
 
 This concept consists of new databases, and new message-interpretations.
 
-New Databases:
+#### New Databases
 
-D1. "Escrow_DB" -- a database of "accounts" and their attributes.
-D2. "Withdrawal_DB" -- a database of pending withdrawals from these accounts, and their statues.
+* D1. "Escrow_DB" -- a database of "accounts" and their attributes.
+* D2. "Withdrawal_DB" -- a database of pending withdrawals from these accounts, and their statues.
 
-New Messages:
+#### New Messages
 
-M1. "Propose New Escrow"
-M2. "ACK Escrow Proposal"
-M3. "Propose Withdrawal"
-M4. (implied) "ACK Withdrawal"
-M5. "Execute Deposit"   -- a transfer of BTC from-main-to-side
-M6. "Execute Withdrawal" -- a transfer of BTC from-side-to-main
+* M1. "Propose New Escrow"
+* M2. "ACK Escrow Proposal"
+* M3. "Propose Withdrawal"
+* M4. (implied) "ACK Withdrawal"
+* M5. "Execute Deposit"   -- a transfer of BTC from-main-to-side
+* M6. "Execute Withdrawal" -- a transfer of BTC from-side-to-main
 
 
 #### On the Resource Requirments of New Databases
@@ -75,7 +75,10 @@ D1 is sorted by field #1 "Escrow Number" (and, as there is only ever one entry p
     4-byte - Commitment header (0x????????)
     158-byte - the critical bytes mentioned above (fields #1, #2, #3, #5, #6, and #7, to populate a new D1 entry)
 
-* Broadcasting a properly-formatted M1 will get an entry into D1, in the very next block. Field #4 will be calculated as per version 1 Bitcoin addresses (see [1]), but with a prefix of "4" instead of "1". Field #8 will be derived from #6 and #7 using math. The initial values of Fields #9 and #10 are set to zeros.
+* Broadcasting a properly-formatted M1 will get an entry into D1, in the very next block.
+* Field #4 will be calculated as per version 1 Bitcoin addresses (see [1]), but with a prefix of "4" instead of "1".
+* Field #8 will be derived from #6 and #7 using math.
+* The initial values of Fields #9 and #10 are set to zeros.
 
 [1] https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses
 
@@ -262,19 +265,17 @@ As a result of these requirements, every single withdrawal-attempt will fail, un
 Header
 =======
 
-  BIP: ????
-  Layer: Consensus (soft fork)
-  Title: Hashrate Escrows (Consensus layer)
-  Author: Paul Sztorc <truthcoin@gmail.com>
-          CryptAxe <cryptaxe@gmail.com>
-  Comments-Summary: No comments yet.
-  Comments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-???????
-  Status: Draft
-  Type: Standards Track
-  Created: 2017-08-14
-  License: PD
-
-
+    BIP: ????
+    Layer: Consensus (soft fork)
+    Title: Hashrate Escrows (Consensus layer)
+    Author: Paul Sztorc <truthcoin@gmail.com>
+            CryptAxe <cryptaxe@gmail.com>
+    Comments-Summary: No comments yet.
+    Comments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-???????
+    Status: Draft
+    Type: Standards Track
+    Created: 2017-08-14
+    License: PD
 
 
 Abstract

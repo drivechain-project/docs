@@ -47,24 +47,34 @@ Roadmap Table
 | 8        | Sidechain Initiates Withdrawal     | After certain withdrawal and timing conditions are met, sidechain calls mainchain to initiate a withdrawal. Includes [s] commands for "GetCurrentWithdrawalRequest" and "GetSidechainPrivkey", which may be run by [m].                                                                                                                                                                                                        | 100%               |
 | 9        | Voting (SPV Proofs, in Coinbase)   | Adding the txID of the CoinJoin-like txn of Step 7. First, this txn is added to a coinbase. Then, miners "upvote" or "downvote" it, committing their work to an interpretation of the withdrawal's validity.                                                                                                                                                                                                                   | 95%                |
 | 10       | OP Code                            | OP CheckWorkScore Verify. This is the code which "locks" the outputs of Step 3. The CoinJoin-like txn of Step 7 can be included in a [m] block (now that it has enough "work"). The transaction moves the coins away from OP CWSV outputs, and locks them in "normal" outputs. The transfer, from [s] back to [m], is now complete.                                                                                            | 99%                |
-| 11       | Merged Mining                      | ~~Sidechain header must be modified to support merged-mining, as was done with Namecoin.~~ We invented [our own customized form of merged-mining](http://www.truthcoin.info/blog/blind-merged-mining/)! Also, header should occasionally contain the txID of Step 7.  Extention blocks are also an option.                                                                                                                                                                                                                                      | 90%                 |
+| 11       | Merged Mining                      | ~~Sidechain header must be modified to support merged-mining, as was done with Namecoin.~~ We invented [our own customized form of merged-mining](http://www.truthcoin.info/blog/blind-merged-mining/)! Also, header should occasionally contain the txID of Step 7.                                                                                                                                                                                                                                      | 90%                 |
 | 12       | GUI                                | Interface for tracking the process. "Transfers" tab in Sidechain-Qt (and plural "Sidechains" tab in Bitcoin-Qt). Upper view: Incoming and Outgoing sections, listing origin and destination addresses. Lower view: WT^ explorer, listing all WT^ in reverse chronological order, identifying them by tx-id (expanding to reveal all WTs in the WT^).                                                                           | 100%                |
 
 
-Notes:
+Notes
+---------
 
 * If vote "fails", Canonical aggregation should try again. Unclear how this should be handled, programmatically.
 * Vote should not trigger at all, in the (rare) event that there are no withdrawal attempts whatsoever.
 * Need to limit size of WT^ (at least, to the size 1 MB), and implement a fee sorting-and-ranking algorithm.
 
-Resources:
+
+Resources
+------------
 
 Visit [drivechain.info/literature](http://www.drivechain.info/literature/index.html) for more.
+
+### BIP Documentation
+
+* See https://github.com/drivechain-project/docs#mainchainbmm
+* Driect link: https://github.com/drivechain-project/docs/blob/master/drivechain-bips.md
+
+### Blog Posts
 
 1. [Drivechains blog post](http://www.truthcoin.info/blog/drivechain/)
 2. [Drivechains OP code](http://www.truthcoin.info/blog/drivechain-op-code/)
 
-Videos:
+### Videos
 
 1. [Sidechain Risks](https://www.youtube.com/watch?v=0goYH2sDw0w&index=1&list=PLw8-6ARlyVciNjgS_NFhAu-qt7HPf_dtg)
 2. [Sidechain Privatization](https://www.youtube.com/watch?v=xGu0o8HH10U&list=PLw8-6ARlyVciMH79ZyLOpImsMug3LgNc4&index=1)
