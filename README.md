@@ -17,7 +17,9 @@ mainchainBMM
 
 The "mainchain" is Bitcoin Core, modified to support drivechain.
 
-This is the codebase: https://github.com/drivechain-project/bitcoin/tree/mainchainBMM
+Codebase: https://github.com/drivechain-project/bitcoin/tree/mainchainBMM
+
+#### BIPS 
 
 Here is some documentation describing the required changes, in BIP format (WIP):
 
@@ -32,9 +34,9 @@ sidechainBMM
 
 The "sidechain" is a blank template (also based on Bitcoin Core), modified to *be* a drivechain.
 
-This is the codebase: https://github.com/drivechain-project/bitcoin/tree/sidechainBMM
+Codebase: https://github.com/drivechain-project/bitcoin/tree/sidechainBMM
 
-Check out a [progress roadmap](https://github.com/drivechain-project/docs/blob/master/roadmap.md).
+A [progress roadmap](https://github.com/drivechain-project/docs/blob/master/roadmap.md).
 
 
 
