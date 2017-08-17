@@ -168,11 +168,11 @@ The TxOut in question would include three arguments: (h*, this_blocknumber, {{si
 1. ..that a side:block of hash h* was mined recently (aka, that h* was included in a main:coinbase recently), AND
 2. ..that the side:block has been buried by 200 side:blocks on the side:chain.
 
-The first is proved by using the linking data to show that a (h*,bM) pair exists in D3. The second is shown by [a] showing that a (h*,bM) pair exists in {{the previous}} main:block (ie, one main:block ago), and [b] showing that the two bM values ("bM_new", from one main:block ago ; and "bM_old", the bM from the pair referenced in the previous sentence) obey the following equation: 
+The first is proved by using the linking data to show that a (h\*,bM) pair exists in D3. The second is shown by [a] showing that a (h\*,bM) pair exists in a previous main:block (any main:block that is <4000 blocks ago), and [b] showing that the two bM values ("bM~new~", the bM from the pair referenced in this sentence ; and "bM~old~", the bM from the pair referenced in the previous sentence) obey the following equation: 
 
 * ~~bM_new > bM_old + 200 [wrong, but instructive]~~
 
-* bM_new > (  (bM_old + 200) mod 65535  )
+* bM~new~ > (  (bM~old~ + 200) mod 65535  )
 
 In contrast, **Simon** is able to spend the txn (and recapture his money) if Mary goes some length of time (say, 500 main:blocks) without accomplishing what she said she would be able to accomplish.
 
