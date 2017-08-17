@@ -124,7 +124,7 @@ We will need to ensure that the sidechain is making "forward progress", without 
 * [3] http://www.truthcoin.info/blog/blind-merged-mining/#handling-reorganizations
 
 
-Note: The two chains (main, and side) cooperate to achieve this mutual goal. While the mainchain enforces the rules described here, each sidechain enforces its own rules. However, we plan on each sidechain using two rules in particular: first, the sidechain [a] knows exactly where to look for these hashes (and, therefore, will always be able to find one unique has per mainchain block) and the sidechain also [b] accepts this hash as being equal to "a prevBlockHash which meets the [side]chain's difficulty target". Second, the sidechain [a] knows exactly where to look for the blockMod, and [b] requires the [mainchain-sourced] given blockMod to actually equal the [sidechain-sourced] modulus of their sidechain.
+Note: The two chains (main, and side) cooperate to achieve this mutual goal. While the mainchain enforces the new rules described here, each sidechain enforces its own rules (not described here). However, we plan on each sidechain using two rules in particular: first, the sidechain [a] knows exactly where to look for these hashes (and, therefore, will always be able to find one unique has per mainchain block) and the sidechain also [b] accepts this hash as being equal to "a prevBlockHash which meets the [side]chain's difficulty target". Second, the sidechain [a] knows exactly where to look for the blockMod, and [b] requires the [mainchain-sourced] given blockMod to actually equal the [sidechain-sourced] modulus of their sidechain.
 
 
 ### New Validation Rules
