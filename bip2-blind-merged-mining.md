@@ -92,7 +92,7 @@ Therefore, D3 would look something like this:
     4000.   (h*, 745)    (h*, 4024)     (h*, 3488)
 
 
-In addition to the (h*, blockMod) pairs (which are shown), the database D3 also cointains (not shown) the information required to prove that each pair included in a coinbase in a recent block.
+In addition to the (h*, blockMod) pairs (which are shown), the database D3 also cointains (not shown) the information required to prove that each pair was included in a coinbase in a recent block.
 
 This would consist of (for the most recent X=4000 blocks):
 
