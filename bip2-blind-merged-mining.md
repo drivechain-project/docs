@@ -108,8 +108,6 @@ This would consist of (for the most recent X=4000 blocks):
             i.   h* (prevSideBlockHash)
             ii.  blockMod
 	
-{{ We could save 1 byte per sidechain per block, by forcing them to take an order. If a sidechain were not mined in this block, it would need to have a dummy placeholder value of 000000000s, which seems awkward in this case (and would waste 32 bytes). So I'm against it for now. }}
-
 
 
 ## Using This Data
