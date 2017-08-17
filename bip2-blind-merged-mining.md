@@ -161,7 +161,7 @@ Note: see https://lightning.network/ for info about how this is often done.
 
 #### Structure
 
-The TxOut in question would include three arguments: (h*, this_blocknumber, timeout).
+The TxOut in question would include three arguments: (h*, this_blocknumber, {{side_timeout=200}}, timeout=500).
 
 #### Mary vs Simon
 
@@ -172,7 +172,8 @@ The TxOut in question would include three arguments: (h*, this_blocknumber, time
 
 The first is proved by using the linking data to show that a (h*,bM) pair exists in D3. The second is shown by [a] showing that a (h*,bM) pair exists in {{the previous}} main:block (ie, one main:block ago), and [b] showing that the two bM values ("bM_new", from one main:block ago ; and "bM_old", the bM from the pair referenced in the previous sentence) obey the following equation: 
 
-* ~~ bM_new > bM_old + 200 [wrong, but instructive] ~~
+~~ bM_new > bM_old + 200 [wrong, but instructive] ~~
+
 * bM_new > (  (bM_old + 200) mod 65535  )
 
 In contrast, **Simon** is able to spend the txn (and recapture his money) if Mary goes some length of time (say, 500 main:blocks) without accomplishing what she said she would be able to accomplish.
