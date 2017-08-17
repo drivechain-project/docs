@@ -5,8 +5,10 @@ Drivechain Documentation
     Paul Sztorc 
 	August 15, 2017
 	Document 1 of 3
+	v0.2
 
 Note from Paul: Double brackets "{{" and "}}" surround parts that are "unfinished".
+???'s indicate free parameters that could be anything, and have yet to be determined.
 
 
 Two Concepts
@@ -25,26 +27,21 @@ A total of three hash-commitments are required, arranged in the following way:
 
                ** Storage of Hash Commitments **   
 
-                 Root of New Merkle Tree  ----> ( inserted into Index 1 of a Coinbase txn {{if the value of TxOut is zero?}} )
-                    /               \
-                   /                 \
-                  /                   \
-                 /                     \
-       Hashrate Escrow Items            \
-          /           \            Blind Merged-Mining Data 
-         /             \             
+       Hashrate Escrow Items  ----> to Coinbase (index 1?)
+          /           \            
+         /             \                       
     Sidechain_DB   Withdrawal_DB      
 
+	Blind Merged-Mining Data  ----> to Coinbase (index 2?)
+	
+	
+{{ Perhaps these could be inserted into indexes 1 and 2; more info: https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2017-June/014669.html }}
 
+This first commitment must always be present, but if miners wish to decline to participate, they can easily calculate a valid hash-values (that does not depend on any information they would not already have).
 
+If the second commitment is not present, sidechain nodes will simply assume that no side:block was found in the last 10 minutes.
 
-This commitment must always be present, but if miners wish to decline to participate in these new subsystems, they can calculate new, valid hash-values that do not depend on any information they do not already have.
-
-To maintain the modularity of the two proposals, each individual proposal can require two hash commitments, in which the second (non-specified) hash is free to be anything.
-
-In other words, the "Hashrate Escrow" proposal [left side] would require a hash commitment of hash(itself, X) where X can take on any value. And the "Blind Merged-Mining" proposal [right side] would require a hash commitment of hash(Y, itself), where Y could take on any value. Thus they are fully separable.
-
-{{ Or, we can store "Hashrate Escrow" and "BMM" hash commitments each in their own Coinbase TxOut. It doesn't matter very much. }}
+(An earlier version of this document described a way of combining the two ideas into a single hash. I decided that it was confusing people, and have removed it.)
 
 
 Links
