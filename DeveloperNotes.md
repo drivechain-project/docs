@@ -1,6 +1,9 @@
 # Developer Notes
 This is just a rough draft, there is much more to be added.
 
+To see the rest of the documentation for the Drivechain project:
+https://github.com/drivechain-project/docs
+
 ## Language used in Drivechains project:
 
 ### `Mainchain`
