@@ -99,7 +99,7 @@ This would consist of (for the most recent X=4000 blocks):
     1. Reusable data (common to all sidechains)
         a. blockNum      -- This (mainchain) block number.
         b. qSidechains   -- Total quantity of sidechains in existence, at this time.
-	c. "Linking Data" (How the h*s are located)
+        c. "Linking Data" (How the h*s are located)
 	    i.  merklePath   -- The path from the mainchain blockheader's hashMerkleRoot down to its coinbase txn.
 	    ii. coinbase txn -- The contents of the coinbase txn itself.
     2. Sidechain specific (data that exists per sidechain):
