@@ -96,17 +96,17 @@ In addition to the (h*, blockMod) pairs (which are shown), the database D3 also 
 
 This would consist of (for the most recent X=4000 blocks):
 
-1. Reusable data (common to all sidechains)
-* * a. blockNum      -- This (mainchain) block number.
-* * b. qSidechains   -- Total quantity of sidechains in existence, at this time.
-* * c. "Linking Data" (How the h*s are located)
-* * * i.  merklePath   -- The path from the mainchain blockheader's hashMerkleRoot down to its coinbase txn.
-* * * ii. coinbase txn -- The contents of the coinbase txn itself.
-2. Sidechain specific (data that exists per sidechain):
-* * a. "chunk" -- location of (h*, blockMod) pair within the coinbase (ie, "1st chunk", "2nd chunk")
-* * b. "pair"  -- the data itself
-* * * i.   h* (prevSideBlockHash)
-* * * ii.  blockMod
+    1. Reusable data (common to all sidechains)
+        a. blockNum      -- This (mainchain) block number.
+        b. qSidechains   -- Total quantity of sidechains in existence, at this time.
+	c. "Linking Data" (How the h*s are located)
+	    i.  merklePath   -- The path from the mainchain blockheader's hashMerkleRoot down to its coinbase txn.
+	    ii. coinbase txn -- The contents of the coinbase txn itself.
+    2. Sidechain specific (data that exists per sidechain):
+        a. "chunk" -- location of (h*, blockMod) pair within the coinbase (ie, "1st chunk", "2nd chunk")
+	b. "pair"  -- the data itself
+	    i.   h* (prevSideBlockHash)
+	    ii.  blockMod
 	
 {{ We could save 1 byte per sidechain per block, by forcing them to take an order. If a sidechain were not mined in this block, it would need to have a dummy placeholder value of 000000000s, which seems awkward in this case (and would waste 32 bytes). So I'm against it for now. }}
 
