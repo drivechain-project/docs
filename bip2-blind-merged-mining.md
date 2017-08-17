@@ -121,9 +121,9 @@ The "ratchet" concept is an attempt to harmonize incentives among the main and s
 
 We will need to ensure that the sidechain is making "forward progress", without tracking too much about the sidechain (see [1] and [2]) and while still allowing the sidechain to reorganize [3].
 
-[1] https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2017-July/014789.html
-[2] http://www.drivechain.info/faq/index.html#what-is-the-difference-between-drivechain-and-extension-blocks
-[3] http://www.truthcoin.info/blog/blind-merged-mining/#handling-reorganizations
+* [1] https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2017-July/014789.html
+* [2] http://www.drivechain.info/faq/index.html#what-is-the-difference-between-drivechain-and-extension-blocks
+* [3] http://www.truthcoin.info/blog/blind-merged-mining/#handling-reorganizations
 
 
 Note: The two chains (main, and side) cooperate to achieve this mutual goal. The mainchain enforces the rules here. Each sidechain enforces its own rules. First, the sidechain [a] knows exactly where to look for these hashes (and, therefore, will always be able to find one unique has per mainchain block) and the sidechain also [b] accepts this hash as being equal to "a prevBlockHash which meets the [side]chain's difficulty target". Secondly, the sidechain [a] knows exactly where to look for the blockMod, and [b] requires the [mainchain-sourced] given blockMod to actually equal the [sidechain-sourced] modulus of their sidechain.
