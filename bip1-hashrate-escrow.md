@@ -97,9 +97,9 @@ Some pause should be given, after one considers that the sidechain design goal i
 
 I have produced a comprehensive quantity of written material [1], presentations [2], etc [3] on exactly what the level of miner-control should be, and why. Specifically, I claim that **miners should be aware of the purpose of the sidechain, and they should reject sidechains which have an unclear purpose or which have a purpose that will lead to decrease in miner-wealth** (where wealth measured explicitly as: the estimated present value of the purchasing power of the BTC block transaction fees). I claim that this criterion is necessary because, just Original Bitcoin filters unwanted interactions among different BTC txns, so too much "Sidechain Bitcoin" filter out unwanted interactions among sidechain.
 
-[1] http://www.truthcoin.info/blog/wise-contracts/
-[2] https://www.youtube.com/watch?v=xGu0o8HH10U&index=1&list=PLw8-6ARlyVciMH79ZyLOpImsMug3LgNc4
-[3] http://www.drivechain.info/literature/index.html
+* [1] http://www.truthcoin.info/blog/wise-contracts/
+* [2] https://www.youtube.com/watch?v=xGu0o8HH10U&index=1&list=PLw8-6ARlyVciMH79ZyLOpImsMug3LgNc4
+* [3] http://www.drivechain.info/literature/index.html
 
 Call it a "sidechain non-aggression principle", if you want.
 
@@ -169,7 +169,7 @@ Field No. | Label | Bytes | Type | Description / Purpose
 7 | Threshold\* | 2 | uInt | Total ACKs needed, this is pulled from D1's field #9.
 8 | Approved\* | 1 | boolean | True while ACKs > Threshold, False otherwise.
 
-\* Denotes a "convenience field" (see above). These can be populated locally.
+\* Denotes a "convenience field" (see above).
 
 Withdrawal_DB requires 46 bytes [1+32+2+3+2+3+2+1] per entry. Of these, 13 bytes ([2+3+2+3+2+1], all fields except #1 and #2) can be generated locally, leaving 33 critical bytes [1+32].
 
@@ -181,7 +181,7 @@ Withdrawal_DB requires 46 bytes [1+32+2+3+2+3+2+1] per entry. Of these, 13 bytes
 4. From one block to the next, entries are only removed from D2 (in the very next block) if:
 * * "Age" = "MaxAge".
 * * If the block contains a txn who's blinded txID matches WT^. {{ This might be too much work, and unnecessary. }}
-3. Rules on the allowed values in the "ACKs" field (field #3). See M4 below.
+5. Rules on the allowed values in the "ACKs" field (field #3). See M4 below.
 
 ### M3 -- "Propose Withdrawal"
 
