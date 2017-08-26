@@ -147,7 +147,7 @@ The escrow will "reuse" the same address over and over. But notice that there is
 ### New Block Validation Rules
 
 1. An entry will be removed from D1, unless that block contains an M2 supporting it (this will increment field #2), or the entry has accumulated 2999 M2s. Therefore, each entry needs to have 2999 *consecutive* M2s supporting it, else it will be removed from D1 and must start over. This requires all miners to agree to "soft fork" the sidechain into existence. This makes it easier to curate the list of active sidechains, and prevents destructive interference (see above) among contradictory sidechains.
-2. Once the entry has 3999 M2s, then a miner must make a 0 btc payment to the Critical Address, thus activating the chain. This payment becomes the first "critical (TxID, index) pair" (or "CTIP").
+2. Once the entry has 2999 M2s, then a miner must make a 0 btc payment to the Critical Address, thus activating the chain. This payment becomes the first "critical (TxID, index) pair" (or "CTIP").
 
 
 
