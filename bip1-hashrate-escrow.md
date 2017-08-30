@@ -4,7 +4,7 @@ Drivechain Documentation
     Paul Sztorc 
     August 15, 2017
     Document 2 of 3
-    v0.3
+    v0.3.1
 
 Note from Paul: Double brackets "{{" and "}}" surround parts that are "unfinished".
 
@@ -272,7 +272,9 @@ However, in practice there *are* additional mainchain requirements...specified b
 
 One method, is for depositors to append a zero-value OP Return to a Deposit txn, so that the sidechain knows where to credit funds on the sidechain network. Mainchain users must upgrade their wallet software, of course, (on an individual basis) in order to become aware of and take advantage of new deposit-methods.
 
-The requirement that each hashrate escrow be linked to a single TxID does create an interesting inconvenience for depositors. If a user is slow to sign a txn after constructing it (perhaps because the user employs an air-gapped computer, etc), then the signed txn may no longer be valid. This is because the input it selects, may no longer be the Critical TxID (as "the" Critical TxID changes with each deposit). Only one user can deposit at a time (although many can deposit per block). As a result, the transaction must fail, and the user would need to be prompted to remake and resign the txn. If this is problem is too frustrating, users can always make main-to-side transfers using atomic cross chain swaps (or, the LN, if they already have a channel open on both chains).
+#### Inconvenient Race Condition
+
+The requirement that each hashrate escrow be linked to a single TxID does create an interesting inconvenience for depositors. If a user is slow to sign a txn after constructing it (perhaps because the user employs an air-gapped computer, etc), then the signed txn may no longer be valid. This is because the input it selects, may no longer be the Critical TxID (as "the" Critical TxID changes with each deposit). **Only one user can deposit at a time** (although many can deposit per block). As a result, the transaction must fail, and the user would need to be prompted to remake and resign the txn. If this is problem is too frustrating, users can always make main-to-side transfers using atomic cross chain swaps (or, the LN, if they already have a channel open on both chains).
 
 Fortunately, it is already a part of mainchain consensus that no two txns can spend the same TxID. The only new issue here is the confusion it might create for the user (hence the need for error messages and alternative deposit-methods).
 
