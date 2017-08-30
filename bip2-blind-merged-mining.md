@@ -72,12 +72,12 @@ This data is parsed by laying it in sequential 35-byte chunks (any remaining dat
 
 Each 35-byte chunk is then parsed to obtain the data outlined above (in "Description"). If two 35-byte chunks being with the same "Sidechain number" (ie, if the two chunks have the same first byte), then only the first chunk has consensus meaning.
 
-We are left with, at most, one  (h\*, blockMod) pair per sidechain per block. This data is added directly to D3, a new database.
+We are left with, at most, one  (h\*, ~~blockMod~~ prevBlockRef) pair per sidechain per block. This data is added directly to D3, a new database.
 
 	
 ### D3 -- "RecentSidechains_DB"
 
-To suit our purposes, the mainchain full nodes will need to keep track of the most recent 4000 (h\*, ~~blockMod~~prevBlockRef) pairs.
+To suit our purposes, the mainchain full nodes will need to keep track of the most recent 4000 (h\*, ~~blockMod~~ prevBlockRef) pairs.
 
 Therefore, D3 would look something like this: 
        
@@ -107,7 +107,7 @@ This would consist of (for the most recent X=4000 blocks):
         a. "chunk" -- location of (h*, blockMod) pair within the coinbase (ie, "1st chunk", "2nd chunk")
         b. "pair"  -- the data itself
             i.   h* (prevSideBlockHash)
-            ii.  {{ blockMod }}
+            ii.  ~~blockMod~~ prevBlockRef (this block's parent)
 	
 
 
@@ -142,8 +142,7 @@ As mentioned above, M7s cause data to be added to D3, which is tracked by the ma
 Specifically, each mainchain node tracks, per sidechain, the last 4000 blockMods.
 
 ~~A new rule is required:~~
-
-~~* Each *new* block can only include an M7, if the blockMod which it inserts (into D3) is within (-4000, +1) of the most recent blockMod avaliable. ~~
+~~Each *new* block can only include an M7, if the blockMod which it inserts (into D3) is within (-4000, +1) of the most recent blockMod avaliable. ~~
 
 {{ Note: This rule needs to be replaced with a simpler rule involving adding a "Blocks Atop" column to D3 }}
 
