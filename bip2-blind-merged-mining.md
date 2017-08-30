@@ -132,7 +132,7 @@ Simply put **the bribe** (specified below as OP\_CheckBribeVerify) **must be ato
 1. The sidechain-block-generator "Simon" paying himself the side:block's side:tx-fees.
 2. "Simon" making a mainchain main:btc payment to a mainchain miner "Mary".
 
-These should be as atomic as possible -- either both succeed or both fail. But, without a ratchet-concept, there are many cases in which the second [bribe] succeeds but the first [side:tx-fees] fails. One such case is when a side:block contains unusually high side:tx-fees. In this case, there will be many candidate bribes submitted to Mary, but only one can be included in each main:block. Without "forward progress" incentive, Mary is likely to include one of these large bribes in the next main:block (and the main:block after that, and so on). 
+These should be as atomic as possible -- either both succeed or both fail. But, without a ratchet-concept, there are many cases in which the second [bribe] succeeds but the first [side:tx-fees] fails. One such case is when a side:block contains unusually high side:tx-fees. In this case, there will be many candidate bribes submitted to Mary, but only one can be included in each main:block. Without an incentive to make "forward progress", Mary is likely to include one of these large bribes in the next main:block (and the main:block after that, and so on). Mary will "blindly" include high-paying bribes for *older* blocks, unless something prevents her from doing so. 
 
 
 ### New Validation Rules
@@ -141,8 +141,9 @@ As mentioned above, M7s cause data to be added to D3, which is tracked by the ma
 
 Specifically, each mainchain node tracks, per sidechain, the last 4000 blockMods.
 
-~~A new rule is required:~~
-~~Each *new* block can only include an M7, if the blockMod which it inserts (into D3) is within (-4000, +1) of the most recent blockMod avaliable. ~~
+~~A new rule is required~~
+
+~~Each *new* block can only include an M7, if the blockMod which it inserts (into D3) is within (-4000, +1) of the most recent blockMod avaliable.~~
 
 {{ Note: This rule needs to be replaced with a simpler rule involving adding a "Blocks Atop" column to D3 }}
 
