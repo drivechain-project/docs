@@ -4,7 +4,7 @@ Drivechain Documentation
     Paul Sztorc 
 	August 16, 2017
 	Document 3 of 3
-	v0.2
+	v0.2.1
 
 Note from Paul: Double brackets "{{" and "}}" surround parts that are "unfinished".
 
@@ -40,6 +40,7 @@ Specifically, we track 35 bytes of information, per sidechain:
     32-bytes - prevSideBlockHash (also known as "h*")
     2-bytes  - blockMod (a counter -- in pratice, it is the sidechain's block number modulus 65535)
 	
+{{ Note: blockMod is vastly improved if it is changed to a prevBlockRef (which is a two-byte number indicating which side:block, of the most recent 4000 side:blocks, is this block's parent. This creates a DAG which is better -- however the documentation has yet to be rewritten with this in mind.) }}
 
 This involves new message types (M7, M8), and a new database (D3).
 
@@ -71,12 +72,12 @@ This data is parsed by laying it in sequential 35-byte chunks (any remaining dat
 
 Each 35-byte chunk is then parsed to obtain the data outlined above (in "Description"). If two 35-byte chunks being with the same "Sidechain number" (ie, if the two chunks have the same first byte), then only the first chunk has consensus meaning.
 
-We are left with, at most, one  (h*, blockMod) pair per sidechain per block. This data is added directly to D3, a new database.
+We are left with, at most, one  (h\*, blockMod) pair per sidechain per block. This data is added directly to D3, a new database.
 
 	
 ### D3 -- "RecentSidechains_DB"
 
-To suit our purposes, the mainchain full nodes will need to keep track of the most recent 4000 (h*, blockMod) pairs.
+To suit our purposes, the mainchain full nodes will need to keep track of the most recent 4000 (h\*, ~~blockMod~~prevBlockRef) pairs.
 
 Therefore, D3 would look something like this: 
        
@@ -92,7 +93,7 @@ Therefore, D3 would look something like this:
     4000.   (h*, 745)    (h*, 4024)     (h*, 3488)
 
 
-In addition to the (h*, blockMod) pairs (which are shown), the database D3 also cointains (not shown) the information required to prove that each pair was included in a coinbase in a recent block.
+In addition to the (h\*, ~~blockMod~~prevBlockRef) pairs (which are shown), the database D3 also cointains (not shown) the information required to prove that each pair was included in a coinbase in a recent block.
 
 This would consist of (for the most recent X=4000 blocks):
 
@@ -106,7 +107,7 @@ This would consist of (for the most recent X=4000 blocks):
         a. "chunk" -- location of (h*, blockMod) pair within the coinbase (ie, "1st chunk", "2nd chunk")
         b. "pair"  -- the data itself
             i.   h* (prevSideBlockHash)
-            ii.  blockMod
+            ii.  {{ blockMod }}
 	
 
 
@@ -124,7 +125,14 @@ We will need to ensure that the sidechain is making "forward progress", without 
 * [3] http://www.truthcoin.info/blog/blind-merged-mining/#handling-reorganizations
 
 
-Note: The two chains (main, and side) cooperate to achieve this mutual goal. While the mainchain enforces the new rules described here, each sidechain enforces its own rules (not described here). However, we plan on each sidechain using two rules in particular: first, the sidechain [a] knows exactly where to look for these hashes (and, therefore, will always be able to find one unique has per mainchain block) and the sidechain also [b] accepts this hash as being equal to "a prevBlockHash which meets the [side]chain's difficulty target". Second, the sidechain [a] knows exactly where to look for the blockMod, and [b] requires the [mainchain-sourced] given blockMod to actually equal the [sidechain-sourced] modulus of their sidechain.
+Note: The two chains (main, and side) cooperate to achieve this mutual goal. While the mainchain enforces the new rules described here, each sidechain enforces its own rules (not described here). However, we plan on each sidechain using two rules in particular: first, the sidechain [a] knows exactly where to look for these hashes (and, therefore, will always be able to find one unique has per mainchain block) and the sidechain also [b] accepts this hash as being equal to "a prevBlockHash which meets the [side]chain's difficulty target". Second, the sidechain [a] knows exactly where to look for the ~~blockMod~~prevBlockRef, and [b] requires the [mainchain-sourced] given ~~blockMod~~ prevBlockRef to actually equal the [sidechain-sourced] modulus of their sidechain.
+
+Simply put **the bribe** (specified below as OP\_CheckBribeVerify) **must be atomic**. The point of the ratchet is to construct a very tight connection between two things:
+
+1. The sidechain-block-generator "Simon" paying himself the side:block's side:tx-fees.
+2. "Simon" making a mainchain main:btc payment to a mainchain miner "Mary".
+
+These should be as atomic as possible -- either both succeed or both fail. But, without a ratchet-concept, there are many cases in which the second [bribe] succeeds but the first [side:tx-fees] fails. One such case is when a side:block contains unusually high side:tx-fees. In this case, there will be many candidate bribes submitted to Mary, but only one can be included in each main:block. Without "forward progress" incentive, Mary is likely to include one of these large bribes in the next main:block (and the main:block after that, and so on). 
 
 
 ### New Validation Rules
@@ -133,9 +141,11 @@ As mentioned above, M7s cause data to be added to D3, which is tracked by the ma
 
 Specifically, each mainchain node tracks, per sidechain, the last 4000 blockMods.
 
-A new rule is required:
+~~A new rule is required:~~
 
-* Each *new* block can only include an M7, if the blockMod which it inserts (into D3) is within (-4000, +1) of the most recent blockMod avaliable.
+~~* Each *new* block can only include an M7, if the blockMod which it inserts (into D3) is within (-4000, +1) of the most recent blockMod avaliable. ~~
+
+{{ Note: This rule needs to be replaced with a simpler rule involving adding a "Blocks Atop" column to D3 }}
 
 
 
