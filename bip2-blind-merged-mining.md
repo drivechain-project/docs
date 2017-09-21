@@ -282,7 +282,7 @@ From here, if the h\* side:block in question is BMMed, they can proceed to (III)
 
 Although, if Simon proceeds immediately, he removes the protection of the 'ratchet'. Ie, Simon removes Mary's incentive to care about blocks being built on this side:block. If Simon's side:block is orphaned, he loses his 7 BTC. Simon can either play it safe, and wait the full 100 side:blocks before moving on (to the third LN txn, above); or else Simon can take the risk if he feels comfortable with it.
 
-If the h\* side:block is not found, then II and III are basically equivalent to each other. Simon and Mary could jointly reconstruct I and go back there, or proceed from there to a new version of II with a different h\*.
+If the h\* side:block is not found, then (II) and (III) are basically equivalent to each other. Simon and Mary could jointly reconstruct I and go back there, or proceed from there to a new version of II with a different h\*.
 
 <!-- obsolete
 
