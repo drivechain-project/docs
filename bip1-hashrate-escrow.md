@@ -4,7 +4,7 @@ Drivechain Documentation
     Paul Sztorc 
     August 15, 2017
     Document 2 of 3
-    v0.3.1
+    v3.1
 
 Note from Paul: Double brackets "{{" and "}}" surround parts that are "unfinished".
 
