@@ -50,6 +50,77 @@ of a sidechain Tau, if a WT^ has been verified such that it has sufficient works
 At the beginning of the next Tau, the SCDB is blank for that sidechain until a new WT^ is shown to the miners. The SCDB 
 is amnesic to previous Tau periods.
 
+## RPC 
+### createcriticaldatatx
+```
+createcriticaldatatx
+Create a critical data transaction
+
+Arguments:
+1. "amount"         (numeric or string, required) The amount in BTC to be spent.
+2. "height"         (numeric, required) The block height this transaction must be included in.
+3. "criticalhash"   (string, required) h* you want added to a coinbase
+
+Examples:
+> bitcoin-cli createcriticaldatatx "amount", "height", "criticalhash"
+> curl --user myusername --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "createcriticaldatatx", "params": ["amount", "height", "criticalhash"] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+ (code -1)
+ ```
+ 
+### listsidechaindeposits
+```
+listsidechaindeposits
+Called by sidechain, return list of deposits
+
+Arguments:
+1. "nsidechain"      (numeric, required) The sidechain number
+
+Examples:
+> bitcoin-cli listsidechaindeposits "nsidechain"
+> curl --user myusername --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "listsidechaindeposits", "params": ["nsidechain"] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+ (code -1)
+```
+### receivewtprime
+```
+receivewtprime
+Called by sidechain to announce new WT^ for verification
+
+Arguments:
+1. "nsidechain"      (int, required) The sidechain number
+2. "rawtx"           (string, required) The raw transaction hex
+
+Examples:
+> bitcoin-cli receivewtprime 
+> curl --user myusername --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "receivewtprime", "params": [] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+ (code -1)
+```
+
+### receivewtprimeupdate
+```
+receivewtprimeupdate
+Receive an update for a WT^
+
+Arguments:
+1. "height"                      (numeric, required) the block height
+2. "updates"                     (array, required) A json array of json objects
+     [
+       {
+         "sidechainnumber":n,    (numeric, required) The sidechain number
+         "hashWTPrime":id,       (string,  required) The WT^ hash
+         "workscore":n           (numeric, required) The updated workscore
+       } 
+       ,...
+     ]
+
+Examples:
+> bitcoin-cli receivewtprimeupdate 
+> curl --user myusername --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "receivewtprimeupdate", "params": [] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/
+ (code -1)
+ 
+ receivewtprimeupdate 10 '[{"sidechainnumber": '1', "hashWTPrime": "'3366e8825f6c0d6da7c870c1ab6b035e1ef1610a6d1e7d7afb972a169c4c648a'", "workscore": '1'}]'
+ 
+```
+
 ## More information:
 
 ### Maximum number of valid sidechains:
