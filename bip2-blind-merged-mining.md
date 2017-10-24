@@ -78,7 +78,7 @@ The other two items, sideHeaderHash and prevBLockRef, are created by sidechain n
 
 The final item, prevBlocRef, is a little more complicated. It is an integer that counts the number of "skips" one must take in the side:chain in order to find the current side:block's parent block. In practice, this value will almost always be zero. It will only be a value other than zero, in cases where invalid sidechain blocks have been mined, or when a side:node intentionally wants to orphan some side:blocks (if a side:node wants to orphan the most-recent N blocks, the value of the current block will be equal to N ; in the block after that it will be back to zero).
 
-![image] ~~ (/bmm-dots-examples.png)
+![dots-image](https://github.com/drivechain-project/docs/blob/master/images/bmm-dots-examples.png?raw=true)
 
 Since the hashes themselves are already ordered by the mainchain, tracing the blockchain's path by index (prevBlockRef) will be the same as tracing it by identifying a list of hashes. In other words, the ordering given via each side:block's "prevBlockRef" will be isomorphic to an ordering given by each side:block's "prevSideHeaderHash" ... if "prevSideHeaderHash is defined to be the sidechain's equivalent of the mainchain's "prevBlockHash". It will be possible to freely convert from one to the other, and we will exploit this later in the "bribe" payment, M8.
 
@@ -213,7 +213,7 @@ We do this by imposing validity-rules on the txn itself:
 
 To impose new requirements on the transaction level (not the block level nor the TxOutput level), we borrow the "flag" trick from SegWit style transactions. If the flag is present, the transaction is examined for extra data, and if this data does not pass certain requirements, the transaction is invalid. With SegWit, this extra data is the signatures, and the extra requirements are the signatures' locations and validity. In the BMM-transactions, the extra data is the (ChainIndex, h\*) pair, which must meet the first two requirements (above) as well as the main:blocknumber, which must meet the third requirement (above).
 
-~~ image/ flags
+![extra-data-image](https://github.com/drivechain-project/docs/blob/master/images/witness-vs-critical.png?raw=true)
 
 This txn structure conserves main:blockspace, because it is the easiest way to refer to a previous sidechain block in 4 bytes, (prevBlockRef + FoK_nLockTime). Instead, we would need to use at least 32 bytes (prevSideBlockHash).
 
