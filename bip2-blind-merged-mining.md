@@ -1,41 +1,64 @@
-Drivechain Documentation
-===========================
-
+    Drivechain Documentation -- Blind Merged Mining
     Paul Sztorc 
-	August 16, 2017
-	Document 3 of 3
-	v3.0
-
-Note from Paul: Double brackets "{{" and "}}" surround parts that are "unfinished".
+    October 24, 2017
+    Document 3 of 3
+    v4.0
 
 
-Concept Two: Blind Merged-Mining
-==================================
+Header
+=======
+
+    BIP: ????
+    Layer: Consensus (soft fork)
+    Title: Blind Merged Mining (Consensus layer)
+    Author: Paul Sztorc <truthcoin@gmail.com>
+            CryptAxe <cryptaxe@gmail.com>
+	    Chris Stewart <chris@suredbits.com>
+    Comments-Summary: No comments yet.
+    Comments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-???????
+    Status: Draft
+    Type: Standards Track
+    Created: 2017-10-24
+    License: PD
+
+Reminder: Double brackets "{{" and "}}" surround parts that are "unfinished".
 
 
-Again, this focuses only on the tasks that mainchain Bitcoin must perform.
+Abstract
+==========
 
-For a description of functions each sidechain must perform, [this](http://www.truthcoin.info/images/bmm-outline.txt) may be more helpful.
+Blind Merged Mining (BMM) is a way of mining special extension blocks. It produces strong guarantees that the block is valid, for *any* arbitrary set of rules; and yet it does so without requiring miners to actually do any validation on the block whatsoever.
 
-For a description of the "whole picture", [this](http://www.truthcoin.info/blog/blind-merged-mining/) may be most helpful.
+For an explanation of the whole picture, please see [this post](http://www.truthcoin.info/blog/blind-merged-mining/). For a description of functions each sidechain must perform, [this](http://www.truthcoin.info/images/bmm-outline.txt) may be more helpful.
+
+This document, however, emphasizes required changes to mainchain Bitcoin to implement BMM. Nodes must track a new database and be ready to interpret three new message types.
 
 
-## Motivation
+Motivation
+============
 
 Regular "Merged-Mining" (MM) allows miners to reuse their hashing work to secure other chains (for example, as in Namecoin). However, traditional MM has two drawbacks:
 
-1. Miners must run a full node of the other chain. (This is because, while meeting the "difficulty requirement" is free, miners will not get paid unless their block is valid. Therefore, they must assemble a valid block first, then merged-mine it.)
-2. Miners are paid on the other chain, not on the regular BTC mainchain. (For example, a miner who merged-mines Namecoin will earn NMC, which he or she will sell for BTC, before selling that BTC in order to pay for electricity.) 
+1. Miners must run a full node of the other chain. (This is because [while miners can effortlessly create the block] miners will not get paid unless the block that they mrg-mined is a valid one. Therefore, miners must assemble a valid block first, then mrg-mine it.)
+2. Miners are paid on the other chain, not on the regular BTC mainchain. For example, miners who mrg-mine Namecoin will earn NMC (and they will need to sell the NMC for BTC, before selling the BTC in order to pay for electricity.) 
 
 Blind Merged-Mining (BMM) attempts to address those shortcomings.
 
 
-## Description
-
-The goals are to [1] track a set of ordered hashes (the merged-mining), and [2] allow miners to "sell" the act of finding a sidechain block (through the use of a new OP CODE -- OP CheckBribeVerify).
 
 
-### Critical Sidechain Info ("Sidechain Mini-Header")
+Specification
+============
+
+
+### Two Goals
+
+The goals are to:
+1. Track a set of ordered hashes (the merged-mining).
+2. Allow miners to "sell" the act of finding a sidechain block (through the use of a new OP CODE -- OP CheckBribeVerify).
+
+
+#### Critical Sidechain Info ("Sidechain Mini-Header")
 
 Specifically, we track 35 bytes of information, per side:block per side:chain:
 
@@ -48,9 +71,9 @@ The ChainIndex keeps data organized when there are more than one sidechain. The 
 This involves three new message types (M7, M8, and M9), and a new database (D3).
 
 
-### Creating / Broadcasting This Data
+#### Creating / Broadcasting This Data
 
-#### Creation
+##### Creation
 
 By the time Blind Merged Mining can take place, the ChainIndex is globally known (it is the "Account Number" in D1 [see previous BIP]).
 
@@ -62,11 +85,11 @@ As we will see, prevBlockRef will be isomorphic to "prevSideHeaderHash" (this "p
 
 The "Bribe" payment, M8, will ultimately come in two versions. The second version is specialized for use in the Lightning Network and must used the full 32-byte prevBlockHash (ironically, this larger transaction is likely to be off-chain and ultimately much cheaper for the Bitcoin network to process). The first version of M8, in contrast, cannot be used inside the Lightning Network but will only require the 2-byte prevBlockRef. (This is important because some side:nodes may be unwilling or unable to open a channel with each main:miner.)
 
-#### Broadcast
+##### Broadcast
 
 Mainchain nodes are going to need this data later, so it must be easy to find. We will put it into the coinbase via OP RETURN.
 
-### M7 -- "Blind-Mine the Sidechain(s)"
+#### M7 -- "Blind-Mine the Sidechain(s)"
 
 Thus, (for n sidechains) we have a coinbase output with:
 
@@ -83,7 +106,7 @@ Each 35-byte chunk is then parsed to obtain the data outlined above (in "Descrip
 We are left with, at most, one  (h\*, prevBlockRef) pair per sidechain per block. This data is added directly to D3, a new database.
 
 	
-### D3 -- "RecentSidechains_DB"
+#### D3 -- "RecentSidechains_DB"
 
 To suit our purposes, the mainchain full nodes will need to keep track of the most recent 8000 (h\*, prevBlockRef) pairs.
 
@@ -108,18 +131,18 @@ D3 also contains a column for each sidechain called "Blocks Atop", which compute
 D3 also contains a column (not shown) for each sidechain containing "prevSideBlockHash". This value is is either drived from prevBlockRef; or else it is given explicitly (in which case it is the converse: prevBlockRef is derived from prevSideBlockHash).
 
 
-### New Validation Rules
+#### New Validation Rules
 
 As mentioned above, M7s cause data to be added to D3, which is tracked by the mainchain for a period of time.
 
 Specifically, each mainchain node tracks, per sidechain, the last 8000 M7s {{ although, here I have it as the last 8000 main:blocks ... not sure which is better }}. In addition, node software must update the BlocksAtop value for all the Row's entries. In practice this is quite easy, because one merely needs to set the new entry to a BlocksAtop value of "0", and then scroll backwards through all of the prevSideBlockHash es and add 1 to everything in this 'chain'. {{possibly an index column could make this even easier}} 
 
 
-## M8 and M9 -- Arranging the Payments
+### M8 and M9 -- Arranging the Payments
 
 This section introduces a new type of transaction, the "bribe" of [the Blind Merged Mining spec](http://www.truthcoin.info/blog/blind-merged-mining/). This txn allows miners to "sell" the act of mining a sidechain block. By taking advantage of this option, miners earn tx fees for mining sidechains...truly "for free". They do not even need to run sidechain nodes, and the tx-fees they earn are in mainchain BTC. As a result, sidechains affect all miners equally and do not upset the mining ecosystem.
 
-### Setup
+#### Setup
 
 We define **"Mary"** as a mainchain miner, and **"Simon"** as a sidechain node.
 
@@ -135,16 +158,16 @@ Simon will use M8 to pay into a "Bribe Escrow" txn. Mary will later withdraw the
 ( Else, Mary will be unable to claim the money, and after the timeout condition is met, it will be exactly as if Simon has merely made a payment to himself. He will ultimately be able to regain access to the funds, this txn might be regarded as an "M9" but at this point it makes no practical difference. )
 
 
-### Goals (this is rather philosophical, and skippable)
+#### Goals (this is rather philosophical, and skippable)
 
-#### Immediate Expiration ("Fill-or-Kill")
+##### Immediate Expiration ("Fill-or-Kill")
 
 We would like to make special guarantees to the counterparties of this transaction. Specifically, instead of Simon's "payments" to Mary, we prefer that Simon gives Mary an "offer" to either accept or decline.
 
 Crucially, we want Simon to safely make many offers to several different Mary's, in realtime (ie, quickly and off-chain). If Simon's offers will *immediately expire*, then Simon will feel comfortable making offers all day long. This fact means that the Marys collectively gain access to a large set of offers. 
 
 
-#### Forward Progress (The Need for a "Ratchet")
+##### Forward Progress (The Need for a "Ratchet")
 
 <!--  Too Long!
 
@@ -172,13 +195,13 @@ But, without a ratchet-concept, there are cases in which the second [bribe] succ
 To address these, we have the concept of "Blocks_Atop" (the "pseudo-confirmations"). Our new OP Code will refuse to main:pay Mary until the side:block in question is buried by X=100 child side:blocks. At this point, both Mary and Simon will get their money at the same time.
 
 
-### M8 -- Pay to Bribe Escrow (The "Bribe")
+#### M8 -- Pay to Bribe Escrow (The "Bribe")
 
 M8 pays from Simon into a "Bribe Escrow". (M9 withdraws from this escrow.)
 
 As previously mentioned, M8 can take two forms. The first does not require the Lightning Network, but has new requirements for Immediate Expiration (see above). The second inherets Immediate Expiration from the Lightning Network itself, but requires extra preparation and a different/larger message.
 
-#### M8_V1 - No Lightning Network
+##### M8_V1 - No Lightning Network
 
 We need a way for Simon to constuct many payments to multiple Marys, such that only one of these is ever included; and only then if Simon's txn is expected to coincide with the finding of Simon's side:block.
 
@@ -209,9 +232,9 @@ These types of transactions have slightly different mempool behavior, and will p
 
 We will discuss M9 next (both versions, as they are very similar), before discussing M8_V2.
 
-### M9 -- OP CheckBribeVerify
+#### M9 -- OP CheckBribeVerify
 
-#### M9_V1 -- No Lightning Network
+##### M9_V1 -- No Lightning Network
 
 When Simon constructs M8_V1, one of the TxOutputs is a payment to Mary, and this payment is locked with a new OP Code, "OP CheckBribeVerify" (CBV).
 
@@ -221,7 +244,7 @@ OP_CBV behaves very similarly in V1 and V2, but not identically. In V1, the cont
     1-byte -- Bribe Version (in this case, equal to "1")
     35-byte -- 'Regular' Sidechain Mini-Header (1+32+2); ChainIndex, h*, prevBlockRef 
 
-#### M9_V2 -- Within Lightning Network
+##### M9_V2 -- Within Lightning Network
 
 In V2, OP_CBV contains:
 
@@ -232,12 +255,12 @@ In V2, OP_CBV contains:
 In both cases, M9 can only be included in a main:block (ie, can only avoid evaluating to a FALSE script outcome) if [1] the Sidechain Mini-Header info is currently present in D3 (of this main:block) and [2] the relevant entry in D3 has a "Blocks_Atop" value of at least 100.
 
 
-### M8 Again (Lightning Network)
+#### M8 Again (Lightning Network)
 
 A second version of M8 emerges naturally from M9_V2 along with the Lightning Network. However, this requires having a LN-channel open with a miner. This may not always be practical (or even possible), especially today.
 
 
-#### M8_V2
+##### M8_V2
 
 In M8_V1, Simon could reuse the same h\* all he wanted, because only one M8_V1 can be included per block per sidechain. However, on the LN no such rule can be enforced, as the goal is to push everything off-chain and include *zero* M8s.
 
@@ -286,7 +309,7 @@ If the h\* side:block is not found, then (II) and (III) are basically equivalent
 
 <!-- obsolete
 
-#### Notes / Improvements
+##### Notes / Improvements
 
 * To discourage Mary from locking up Simon's money in an inconvenient way, we could force Mary to also send a very small amount of her money into the transaction -- much less than she is being paid, but enough to reimburse Simon for the inconvenience of having his money locked away temporarily. This has the added benefit of making Simon care less about having his money unfairly locked up -- we can increase the timeout period from 500 main:blocks to a larger number.
 * As usual, Simon and Mary can utilize the lightning network, such that their txns never needs to make it onto the chain, unless there is a dispute.
@@ -296,55 +319,15 @@ If the h\* side:block is not found, then (II) and (III) are basically equivalent
 
 
 
-{{ BIP Stuff }}
-
-
-Header
-=======
-
-    BIP: ????
-    Layer: Consensus (soft fork)
-    Title: Blind Merged-Mining (Consensus layer)
-    Author: Paul Sztorc <truthcoin@gmail.com>
-            CryptAxe <cryptaxe@gmail.com>
-            Chris Stewart <chris@suredbits.com>
-    Comments-Summary: No comments yet.
-    Comments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-??????
-    Status: Draft
-    Type: Standards Track
-    Created: 2017-08-14
-    License: PD
-
-
-
-
-Abstract
-==========
-
-{{ Abstract }}
-
-
-Motivation
-============
-
-{{ Take from the intro -- "Merged...those shortcomings" }}
-
-
-Backward compatibility
-========================
-
-{{ Usual stuff about soft forks. }}
-
-{{ What old nodes do if they encounter new data. }}
-
-BONUS: Sidechains inherit the "soft fork" safe-upgrade-incentive, as soft forks are the only way to guarantee that the WT^s reported by different clients will continue to match.
-
 
 Deployment
 ===========
 
-{{ Stuff about versionbits -- copy from https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki#deployment }}
+This BIP will be deployed by "version bits" BIP9 with the name "blindmm" and using bit ???.
 
+For Bitcoin mainnet, the BIP9 starttime will be midnight ??????????? UTC (Epoch timestamp ???) and BIP9 timeout will be ??????????? UTC (Epoch timestamp ???).
+
+For Bitcoin testnet, the BIP9 starttime will be midnight ??????????? UTC (Epoch timestamp ???) and BIP9 timeout will be ??????????? UTC (Epoch timestamp ???).
 
 Reference Implementation
 ==========================
@@ -366,8 +349,7 @@ References
 Thanks
 =========
 
-{{ Thank all the good reviewers }}
-
+Thanks to everyone who contributed to the discussion, especially: ZmnSCPxj, Adam Back, Peter Todd, Dan Anderson, Sergio Demian Lerner, Matt Corallo, Sjors Provoost, Tier Nolan, Erik Aronesty, Jason Dreyzehner, Joe Miyamoto.
 
 
 Copyright
