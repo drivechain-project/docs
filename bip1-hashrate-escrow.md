@@ -67,7 +67,7 @@ Hashrate Escrows are built of two types of component: [1] new databases, and [2]
 * M6. "Execute Withdrawal" -- a transfer of BTC from-side-to-main
 
 
-#### On the Resource Requirments of New Databases
+#### On the Resource Requirements of New Databases
 
 The "new" databases are simply reinterpretations of data that are already contained elsewhere in the blockchain. Specifically, M1 M2 and M3 are all located in the block's coinbase txn, and M5 and M6 can be found in any txn. M4 is a special case and does not actually need to be included anywhere, so it is not.
 
@@ -88,7 +88,7 @@ Field No. | Label | Bytes | Type | Description / Purpose
 2 | Active\* | 2 | uInt | This counter starts at zero when a new entry is added, and increments as a new entry is supported by "M2". The entry either reaches the max value of 4032 (at which point the counter freezes), or else the entry is removed. This enforces the requirement "a soft fork is required to add a new escrow".
 3 | Escrow Name/Description | 120 | string | A human-readable name and description of the sidechain. More than enough space to hold a 32 byte hash. Helps prevent destructive interference among sidechains (see below).
 4 | Critical Private Key | 32 | hex | This is the Double-SHA256 of the binary release of the reference software. It ties the sidechain to a specific software release, and doubles as a way of signing withdrawals (see below).
-5 | Critical Address\* | 32 | string | This is derived by taking f(x) = ImportPrivateKey(HexToBase58Check(x)) of field #3. It is intentionally in the human-readible format {{although it could be 25 bytes of binary}}.
+5 | Critical Address\* | 32 | string | This is derived by taking f(x) = ImportPrivateKey(HexToBase58Check(x)) of field #3. It is intentionally in the human-readable format {{although it could be 25 bytes of binary}}.
 6 | Waiting Period | 2 | uInt | A timing parameter, expressed in the units "number of blocks". The max value is 65535, or just over 15 months. This prevents "surprises" in withdrawing, which is helpful because surprises can only benefit attackers.
 7 | Voting Period | 2 | uInt | A timing parameter, expressed in the units "number of blocks". If this is higher, withdrawals will be more secure, but slower.
 8 | Threshold Given | 1 | uInt | This is interpreted as a percentage, but "per 256" (instead of per 100), and will be used later to regulate withdrawals. A higher value indicates that more hashrate is needed to withdraw from the escrow. As a result, higher values are more secure but may also be "too secure" (with even valid withdrawals often failing).
