@@ -67,7 +67,7 @@ Visit [drivechain.info/literature](http://www.drivechain.info/literature/index.h
 ### BIP Documentation
 
 * See https://github.com/drivechain-project/docs#mainchainbmm
-* Driect link: https://github.com/drivechain-project/docs/blob/master/drivechain-bips.md
+* Direct link: https://github.com/drivechain-project/docs/blob/master/drivechain-bips.md
 
 ### Blog Posts
 

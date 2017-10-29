@@ -1,5 +1,5 @@
     Drivechain Documentation -- Blind Merged Mining
-    Paul Sztorc 
+    Paul Sztorc
     October 24, 2017
     Document 3 of 3
     v4.0
@@ -44,7 +44,7 @@ Motivation
 Regular "Merged-Mining" (MM) allows miners to reuse their hashing work to secure other chains (for example, as in Namecoin). However, traditional MM has two drawbacks:
 
 1. Miners must run a full node of the other chain. (This is because [while miners can effortlessly create the block] miners will not get paid unless the block that they mrg-mined is a valid one. Therefore, miners must assemble a valid block first, then mrg-mine it.)
-2. Miners are paid on the other chain, not on the regular BTC mainchain. For example, miners who mrg-mine Namecoin will earn NMC (and they will need to sell the NMC for BTC, before selling the BTC in order to pay for electricity.) 
+2. Miners are paid on the other chain, not on the regular BTC mainchain. For example, miners who mrg-mine Namecoin will earn NMC (and they will need to sell the NMC for BTC, before selling the BTC in order to pay for electricity.)
 
 Blind Merged-Mining (BMM) attempts to address those shortcomings.
 
@@ -63,7 +63,7 @@ Specifically, per side:block per side:chain, we track the following 35 bytes of 
     1-byte   - ChainIndex (known as "Account Number" in hashrate-escrows.md , or as "Sidechain Number")
     32-bytes - sideHeaderHash (also known as "h*", conceptually this is a hashMerkleRoot [or the blockHash, aka prevBlockHash of *this* block] with arbitrarily greater flexibility)
     2-bytes  - prevBlockRef (an index which points to this side:block's parent side:block)
-    
+
 The **ChainIndex** keeps data organized when there are multiple sidechains. It serves a similar function to Bitcoin's "magic bytes". The **sideHeaderHash** determines the data that each side:block is expected to contain. It serves a similar function to Bitcoin's "hashMerkleRoot". The **prevBlockRef** forces the set of headers into a blockchain structure. It is most similar to Bitcoin's hashPrevBlock.
 
 Where does this data come from, and how does it get around?
@@ -76,7 +76,7 @@ By the time Blind Merged Mining can take place, the ChainIndex is globally known
 
 The other two items, sideHeaderHash and prevBLockRef, are created by sidechain nodes. sideHeaderHash is quite straightforward -- side:nodes build side:block-headers, and take the hash of these.
 
-The final item, prevBlocRef, is a little more complicated. It is an integer that counts the number of "skips" one must take in the side:chain in order to find the current side:block's parent block. In practice, this value will almost always be zero. It will only be a value other than zero, in cases where invalid sidechain blocks have been mined, or when a side:node intentionally wants to orphan some side:blocks (if a side:node wants to orphan the most-recent N blocks, the value of the current block will be equal to N ; in the block after that it will be back to zero).
+The final item, prevBlockRef, is a little more complicated. It is an integer that counts the number of "skips" one must take in the side:chain in order to find the current side:block's parent block. In practice, this value will almost always be zero. It will only be a value other than zero, in cases where invalid sidechain blocks have been mined, or when a side:node intentionally wants to orphan some side:blocks (if a side:node wants to orphan the most-recent N blocks, the value of the current block will be equal to N ; in the block after that it will be back to zero).
 
 ![dots-image](https://github.com/drivechain-project/docs/blob/master/images/bmm-dots-examples.png?raw=true)
 
@@ -98,7 +98,7 @@ Thus, (for n sidechains) we have a coinbase output with:
     1-byte - Push the following (4+(n*35)) bytes (0x??)
     4-byte - Message header (0x????????)
     (4+(n*35))-byte - A sequence of bytes, of the three items directly mentioned above ("Sidechain Mini-Header").
-	
+
 
 This data is parsed by laying it in sequential 35-byte chunks (any remaining data --ie, some final chunk that is less than 35 bytes in length-- has no consensus meaning).
 
@@ -106,15 +106,15 @@ Each 35-byte chunk is then parsed to obtain the data outlined above (in "Descrip
 
 We are left with, at most, one  (h\*, prevBlockRef) pair per sidechain per block. This data is added directly to D3, a new database.
 
-	
+
 #### D3 -- "RecentSidechains_DB"
 
 To suit our purposes, the mainchain full nodes will need to keep track of the most recent 8000 (h\*, prevBlockRef) pairs.
 
-Therefore, D3 would look something like this: 
-       
-	   
-           BlockHeight  CB_Index    SC_1   Blks_Atop_1   SC 2   Blks_Atop_2   SC 3   Blks_Atop_3      
+Therefore, D3 would look something like this:
+
+
+           BlockHeight  CB_Index    SC_1   Blks_Atop_1   SC 2   Blks_Atop_2   SC 3   Blks_Atop_3
             ---------    ------    ------   ---------   ------   ---------   ------   ---------
        1.    401,005        2      (h*, 0)     7985     (h*, 0)        1     (h*, 0)        0
        2.    401,006        4      (h*, 0)     7984     (h*, 0)        0     (h*, 1)     7801
@@ -136,7 +136,7 @@ D3 also contains a column (not shown) for each sidechain containing "prevSideBlo
 
 As mentioned above, M7s cause data to be added to D3. Recent D3 data is tracked by all mainchain nodes for a period of time.
 
-Specifically, each mainchain node tracks, per sidechain, the last 8000 M7s {{ although, here I have it as the last 8000 main:blocks ... not sure which is better }}. In addition, node software must update the BlocksAtop value for all the Row's entries. This can be done in two easy steps: First, set the new entry to a BlocksAtop value of "0" (which is correct by definition). Second, scroll backwards through all of the prevSideBlockHash-es, and add 1 to the BlocksAtop value of everything in this 'chain'. {{possibly an index column could make this even easier}} 
+Specifically, each mainchain node tracks, per sidechain, the last 8000 M7s {{ although, here I have it as the last 8000 main:blocks ... not sure which is better }}. In addition, node software must update the BlocksAtop value for all the Row's entries. This can be done in two easy steps: First, set the new entry to a BlocksAtop value of "0" (which is correct by definition). Second, scroll backwards through all of the prevSideBlockHash-es, and add 1 to the BlocksAtop value of everything in this 'chain'. {{possibly an index column could make this even easier}}
 
 
 ### M8 and M9 -- Arranging the Payments
@@ -192,23 +192,23 @@ Either both of the two should succeed, or else both should jointly fail.
 
 However, absent our intervention, there are cases in which the second thing [bribe] succeeds but the first thing [side:tx-fees] fails. One such case is when a side:block contains unusually high side:tx-fees. Here, there will be many candidate bribes submitted to Mary, but only one can be included in each main:block. Without an incentive to make "forward progress", Mary is likely to include one of these large bribes in the next main:block (and the main:block after that, and so on). Mary will "blindly" include high-paying bribes for *older* blocks, unless something prevents her from doing so.
 
-To address these, we ultilize the concept of "Blocks_Atop" (the "side:confirmations") that we mentioned earlier. Our new OP Code will refuse to main:pay Mary until the side:block in question is buried by X=100 child side:blocks. At this future time, both Mary and Simon will get paid simultaneously.
+To address these, we utilize the concept of "Blocks_Atop" (the "side:confirmations") that we mentioned earlier. Our new OP Code will refuse to main:pay Mary until the side:block in question is buried by X=100 child side:blocks. At this future time, both Mary and Simon will get paid simultaneously.
 
 
 #### M8 -- Pay to Bribe Escrow (The "Bribe")
 
 M8 pays from Simon into a "Bribe Escrow". (M9, below, withdraws from this escrow.)
 
-As previously mentioned, M8 can take two forms. The first does not require the Lightning Network, but it does have new requirements for Immediate Expiration (see above). The second inherets Immediate Expiration from the Lightning Network itself, but requires extra preparation and a different/larger message.
+As previously mentioned, M8 can take two forms. The first does not require the Lightning Network, but it does have new requirements for Immediate Expiration (see above). The second inherits Immediate Expiration from the Lightning Network itself, but requires extra preparation and a different/larger message.
 
 ##### M8_V1 - No Lightning Network
 
-In the first version of M8, we need to introduce the concept of Immediate Expiration (see above). In other words, we need a way for Simon to constuct many payments to multiple Marys, such that only one of these is ever included; and only then if Simon's txn is expected to coincide with the finding of Simon's side:block.
+In the first version of M8, we need to introduce the concept of Immediate Expiration (see above). In other words, we need a way for Simon to construct many payments to multiple Marys, such that only one of these is ever included; and only then if Simon's txn is expected to coincide with the finding of Simon's side:block.
 
 We do this by imposing validity-rules on the txn itself:
 
 1. The txn's content, when examined, must match part of the main:block's content. Specifically, the (ChainIndex, h\*) pair of the txn, must match one of the (ChainIndex, h\*) pairs in the M7 of this main:block.
-2. Only one bribe per ChainIndex per main:block. In other words, if 400 people all try to bm-mine the sidechain with ChainIndex==4, then not only is it the case that only one side_4:block can be found, but it is also the case that only the corresponding M8 txn can be included (out of all of the 400 M8s which are for ChainIndex==4). 
+2. Only one bribe per ChainIndex per main:block. In other words, if 400 people all try to bm-mine the sidechain with ChainIndex==4, then not only is it the case that only one side_4:block can be found, but it is also the case that only the corresponding M8 txn can be included (out of all of the 400 M8s which are for ChainIndex==4).
 3. Simon's txns must only be valid for the current block; afterward, they immediately expire. This is because Simon's intended prevBlockRef may change from one main:block to the next.
 
 To impose new requirements on the transaction level (not the block level nor the TxOutput level), we borrow the "flag" trick from SegWit style transactions. If the flag is present, the transaction is examined for extra data, and if this data does not pass certain requirements, the transaction is invalid. With SegWit, this extra data is the signatures, and the extra requirements are the signatures' locations and validity. In the BMM-transactions, the extra data is the (ChainIndex, h\*) pair, which must meet the first two requirements (above) as well as the main:blocknumber, which must meet the third requirement (above).
@@ -219,7 +219,7 @@ This txn structure conserves main:blockspace, because it is the easiest way to r
 
 These types of transactions have slightly different mempool behavior, and will probably be need to be kept in a second mempool. These txns are received, checked immediately, and if valid they are evaluated for inclusion in a block. If they are not included in the current block, they are discarded. In fact, after any main:block is found, everything in this "second mempool" should be discarded immediately. (This includes cases where the blockchain reorganizes.) There is no re-evaluation of the txns in this mempool -- they are evaluated once and then either included or discarded.
 
-Interestingly, these payments will *always* be from non-miners to miners. Therefore, non-mining nodes do not need to keep them in any mempool at all. Non-miner nodes can just wait for a block to be found, and check the txn then. These transactions more resemble a stock market's pit trades (in contrast, regular Bitcoin txns remind me more of paper checks). 
+Interestingly, these payments will *always* be from non-miners to miners. Therefore, non-mining nodes do not need to keep them in any mempool at all. Non-miner nodes can just wait for a block to be found, and check the txn then. These transactions more resemble a stock market's pit trades (in contrast, regular Bitcoin txns remind me more of paper checks).
 
 We will discuss M9 next (both versions, as they are very similar), before returning to M8_V2.
 
@@ -264,7 +264,7 @@ With a unique h\* per Mary, and at most 1 h\* making it into a block (per sidech
 
 That's probably confusing, so here is an example, in which: Simon starts with 13 BTC, Mary starts with 40 BTC, the side:block's tx-fees currently total 7.1 BTC, and Simon is keeping 0.1 BTC for himself and paying 7 BTC via bribe.
 
-We start with (I):    
+We start with (I):
 
     Simon 13 in, Mary 40 in ; 53 in total
         Simon's version [signed by Mary]
@@ -272,10 +272,10 @@ We start with (I):
             40 ; to Mary
         Mary's version [signed by Simon]
             40 ; to me if TimeLock=over; OR to Simon if MarySig
-            13 ; to Simon    
+            13 ; to Simon
 
 
-And both parties move, from there to "M8_V2" (II):    
+And both parties move, from there to "M8_V2" (II):
 
     Simon 13 in, Mary 40 in ; 53 in total
         Simon's version [signed by Mary]
@@ -295,7 +295,7 @@ From here, if the h\* side:block in question is BMMed, they can proceed to (III)
             47 ; to Mary
         Mary's version [signed by Simon]
             47 ; to me if TimeLock=over; OR to Simon if MarySig
-            6 ; to Simon   
+            6 ; to Simon
 
 Although, if Simon proceeds immediately, he removes the protection of the 'ratchet'. Ie, Simon removes Mary's incentive to care about blocks being built on this side:block. If Simon's side:block is orphaned, he loses his 7 BTC. Simon can either play it safe, and wait the full 100 side:blocks before moving on (ie, moving on to the third LN txn, above); or else Simon can take the risk if he feels comfortable with it.
 
