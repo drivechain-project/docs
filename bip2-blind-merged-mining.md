@@ -46,7 +46,7 @@ Motivation
 Regular "Merged-Mining" (MM) allows miners to reuse their hashing work to secure other chains (for example, as in Namecoin). However, traditional MM has two drawbacks:
 
 1. Miners must run a full node of the other chain. (This is because [while miners can effortlessly create the block] miners will not get paid unless the block that they merge mine is a valid one. Therefore, miners must assemble a valid block first, then merge mine it.)
-2. Miners are paid on the other chain, not on the regular BTC mainchain. For example, miners who merge mine Namecoin will earn NMC (and they will need to sell the NMC for BTC, before selling the BTC in order to pay for electricity.)
+2. Miners are paid on the other chain, not on the regular BTC mainchain. For example, miners who merge mine Namecoin will earn NMC (and they will need to sell the NMC for BTC, before selling the BTC in order to pay for electricity).
 
 Blind Merged-Mining (BMM) attempts to address both shortcomings.
 
@@ -75,7 +75,7 @@ Where does this data come from, and how does it get around?
 
 ##### Creation
 
-By the time Blind Merged Mining can take place, the ChainIndex is globally known (it is the "Account Number" in D1 [see previous BIP]). Each sidechain when activated by soft fork, will take one of the 0-255 available indexes.
+By the time Blind Merged Mining can take place, the ChainIndex is globally known (it is the "Account Number" in D1 [see previous BIP]). Each sidechain, when activated by soft fork, will take one of the 0-255 available indexes.
 
 The other two items, sideHeaderHash and prevBlockRef, are created by sidechain nodes. sideHeaderHash is quite straightforward -- side:nodes build side:blocks, and take the hash of these.
 
@@ -134,7 +134,7 @@ To efficiently keep track of the above data, without having to constantly load e
 
 ### M8 -- Paying miners to include BMM data in their coinbase outputs
 
-This section introduces a new type of transaction, which allows sidechain block creators to request, and pay for, a critical hash to be included in a specific block by mainchain miners. See [the Blind Merged Mining spec](http://www.truthcoin.info/blog/blind-merged-mining/). This txn allows miners to "sell" the act of mining a sidechain block. By taking advantage of this option, miners earn tx fees for mining sidechains...truly "for free". They do not even need to run sidechain nodes, and the tx-fees they earn are in mainchain BTC. As a result, sidechains affect all miners equally and do not upset the mining ecosystem.
+This section introduces a new type of transaction, which allows sidechain block creators to request, and pay for, a critical hash to be included in a specific block by mainchain miners. See [the Blind Merged Mining spec](http://www.truthcoin.info/blog/blind-merged-mining/). This txn allows miners to "sell" the act of mining a sidechain block. By taking advantage of this option, miners earn tx fees for mining sidechains...truly "for free". They do not even need to run sidechain nodes, and the tx-fees they earn are in mainchain BTC. As a result, sidechains affect all miners equally and do not affect the mining ecosystem.
 
 M8 will ultimately come in two versions. The second version will be specialized for use in the Lightning Network and must use the full 32-byte prevBlockHash (ironically, this larger transaction is likely to be off-chain and ultimately cheaper for the Bitcoin network to process). The first version of M8, in contrast, cannot be used inside the Lightning Network but only requires a single byte prevBlockRef to maintain chain order. It is important to have both, because some side:nodes may be unwilling or unable to open a payment channel with each main:miner even though eventually it seems that the lightning version will be preferred.
 
@@ -161,7 +161,7 @@ We will need to ensure that the sidechain is making "forward progress" as well, 
 * [2] http://www.drivechain.info/faq/index.html#what-is-the-difference-between-drivechain-and-extension-blocks
 * [3] http://www.truthcoin.info/blog/blind-merged-mining/#handling-reorganizations
 
-Bitcoin and sidechains must cooperate (and move both chains forward) to achieve the mutual goal of being paid for their work. Therefore the ratchet system must keep track of sidechain "mini-headers" (see Sidechain Critical Data ("Sidechain Mini-Header")) and count the "blocks atop" maturity of the related side:blocks. By requiring side:block maturity without actually making the mainchain track the side:blocks we encourage progress of both the main and side chains, without placing undue Burton on any miner (again, they don't even need to run a sidechain node to profit this).
+Bitcoin and sidechains must cooperate (and move both chains forward) to achieve the mutual goal of being paid for their work. Therefore the ratchet system must keep track of sidechain "mini-headers" (see Sidechain Critical Data ("Sidechain Mini-Header")) and count the "blocks atop" maturity of the related side:blocks. By requiring side:block maturity without actually making the mainchain track the side:blocks we encourage progress of both the main and side chains, without placing undue burden on any miner (again, they don't even need to run a sidechain node to profit from this).
 
 Simon's offer to Mary to include a critical hash in exchange for payment must be *atomic*. The "ratchet" concept helps to construct a very tight connection between two things:
 
