@@ -95,10 +95,10 @@ Mainchain nodes are going to need this data later, so it must be easy to find. W
 
 Thus, (for n sidechains) we have a coinbase output with:
 
-    1-byte - OP_RETURN (0x6a)
-    4-bytes - Identifying flag bytes / message header
-    32-bytes - h*
-    5 to 7-bytes - the rest of the Sidechain Mini-Header
+    1-byte    - OP_RETURN (0x6a)
+    4-bytes   - Identifying flag bytes / message header
+    32-bytes  - h*
+    5~7-bytes - the rest of the Sidechain Mini-Header
 
 This can be an individual output for each sidechain, {{ or to save some amount of block space we can combine the information for each sidechain into a single scriptPubKey. Doing this means that we wont be duplicating the OP_RETURN prefix or identifying flag bytes. This would take up 9,479 bytes for 256 sidechains assuming that 5 bytes are used for the Critical Data bytes (non h* parts of the Sidechain Mini-Header). Conveniently just below the 10 KB scriptPubKey size limit }}
 
@@ -184,8 +184,8 @@ transaction is included in. For the non Lightning version, we have created a new
 ##### M8_V1 - Critical Data format with no Lightning Network
 
 Critical data structure for non Lightning use:
-    5 to 7-bytes -- (Identifying flag bytes, ChainIndex, prevBlockRef)
-    32-bytes -- h* side:block hash
+    5~7-bytes - (Identifying flag bytes, ChainIndex, prevBlockRef)
+    32-bytes  - h* side:block hash
 
 We impose the following validity-rules for these critical data txn(s):
 
@@ -203,9 +203,9 @@ These payments (M8) will *always* be directed specifically to miners and nobody 
 
 ##### M8_V2 Critical Data format when using Lightning network
 
-    4-bytes -- Identifying flag bytes
-    1-byte -- M8 Version (in this case, equal to "2")
-    65-byte -- 'Big' Sidechain Mini-Header (1+32+32); This consists of: (ChainIndex, h*, prevSideBlockHash)
+    4-bytes - Identifying flag bytes
+    1-byte  - M8 Version (in this case, equal to "2")
+    65-byte - 'Big' Sidechain Mini-Header (1+32+32); This consists of: (ChainIndex, h*, prevSideBlockHash)
 
 M8_V2 requires having a LN-channel open with a miner. This may not always be practical (or even possible), especially today.
 
