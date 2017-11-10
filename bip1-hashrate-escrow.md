@@ -1,5 +1,5 @@
     Drivechain Documentation -- Hashrate Escrows
-    Paul Sztorc 
+    Paul Sztorc
     October 23, 2017
     Document 2 of 3
     v4.0
@@ -18,7 +18,7 @@ Header
     Status: Draft
     Type: Standards Track
     Created: 2017-08-14
-    License: PD
+    License: BSD-2-Clause
 
 
 Abstract
@@ -28,6 +28,11 @@ A "Hashrate Escrow" is a clearer term for the concept of "locked to an SPV Proof
 
 The concept resembles a 2-of-3 multisig escrow, where the 3rd party (who will arbitrate any disputes) is the set of Bitcoin Miners. However, miners do not sign the transaction with a private key. Instead, they sign it by directing hashpower over it for a period of time.
 
+Copyright
+==========
+
+This BIP is licensed under the BSD 2-clause license.
+
 
 Motivation
 ============
@@ -36,9 +41,9 @@ In practice these escrows are likely to be "asymmetric sidechains" of Bitcoin (s
 
 Sidechains have potential benefits, including:
 
-1. Protect Bitcoin from competition from altcoins and spinoffs. Safely allow competing implementations (of *sidechains*). 
+1. Protect Bitcoin from competition from altcoins and spinoffs. Safely allow competing implementations (of *sidechains*).
 2. Protect Bitcoin from hard fork campaigns. (Such campaigns represent an existential threat to Bitcoin, as well as an avenue for developer corruption.)
-3. Help with review, by making it must easier for reviewers to ignore bad ideas.
+3. Help with review, by making it much easier for reviewers to ignore bad ideas.
 4. Provide an avenue for good-but-confusing ideas to prove their value safely.
 
 
@@ -55,7 +60,7 @@ Hashrate Escrows are built of two types of component: [1] new databases, and [2]
 ##### 1. New Databases
 
 * D1. "Escrow_DB" -- a database of "accounts" and their attributes.
-* D2. "Withdrawal_DB" -- a database of pending withdrawals from these accounts, and their statues.
+* D2. "Withdrawal_DB" -- a database of pending withdrawals from these accounts, and their statuses.
 
 ##### 2. New Messages
 
@@ -94,10 +99,10 @@ Field No. | Label | Bytes | Type | Description / Purpose
 8 | Threshold Given | 1 | uInt | This is interpreted as a percentage, but "per 256" (instead of per 100), and will be used later to regulate withdrawals. A higher value indicates that more hashrate is needed to withdraw from the escrow. As a result, higher values are more secure but may also be "too secure" (with even valid withdrawals often failing).
 9 | Threshold Calc\* | 2 | uInt | This is derived by taking f(x,y) = ceiling(x*[y/256]) of fields (#6, #7). It could be interpreted as: total number of "AckBlocks" needed, out of total number of "Voting Period" blocks. This interpretation is similar to Bit-signaling.
 10 | "CTIP" -- Part 1 "TxID"\* | 32 | hex | The CTIP, or "Critical (TxID, Index) Pair" is a variable for keeping track of where the escrow's money is (ie, which member of the UTXO set).
-11 | "CTIP" -- Part 2 "Index"\* | 4 | hex | Of the CTIP, this is second element of the pair: the Index. See #10 above. 
+11 | "CTIP" -- Part 2 "Index"\* | 4 | hex | Of the CTIP, this is second element of the pair: the Index. See #10 above.
 
 
-\* Denotes a "convenience field", the entry for this field is derived from other fields, or from the blockchain-state itself. The escrow-creator does not need to provide these values in M1 (or anywhere). 
+\* Denotes a "convenience field", the entry for this field is derived from other fields, or from the blockchain-state itself. The escrow-creator does not need to provide these values in M1 (or anywhere).
 
 Escrow_DB requires 230 bytes [1+120+32+32+2+2+1+2+2+32+4] for each escrow in the main blockchain. Of these, 72 bytes [32+2+2+32+4] are merely for convenience. Therefore, a sidechain is defined (see "M1") by 158 bytes of information.
 
@@ -238,7 +243,7 @@ If there are n Escrows and m Withdrawals-per-escrow<sup>1</sup>, then there are 
 
 First, for nodes which validate all sidechains (assuming these escrows are sidechains), this simplifies to 2^n -- these nodes only have to choose between the single honest choice (on one hand) or an abstention (on the other). Second, even for nodes that don't validate any sidechains, the number of candidates might be reduced from m^n to 3^n, by making a simplifying assumption: whichever withdrawal was most recently added/upvoted, is likely to be the one which is upvoted next.
 
-Of course, that is still O(k^n) for n sidechains, which isn't great<sup>2</sup>. If the "D2 update" cannot be guessed, it must be transmitted in some way. 
+Of course, that is still O(k^n) for n sidechains, which isn't great<sup>2</sup>. If the "D2 update" cannot be guessed, it must be transmitted in some way.
 
 Two examples for transmitting it are below:
 
@@ -383,10 +388,3 @@ Credits
 =========
 
 Thanks to everyone who contributed to the discussion, especially: ZmnSCPxj, Adam Back, Peter Todd, Dan Anderson, Sergio Demian Lerner, Chris Stewart, Matt Corallo, Sjors Provoost, Tier Nolan, Erik Aronesty, Jason Dreyzehner, Joe Miyamoto.
-
-
-
-Copyright
-==========
-
-This document is placed in the public domain.

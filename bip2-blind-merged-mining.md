@@ -13,16 +13,13 @@ Header
     Title: Blind Merged Mining (Consensus layer)
     Author: Paul Sztorc <truthcoin@gmail.com>
             CryptAxe <cryptaxe@gmail.com>
-	    Chris Stewart <chris@suredbits.com>
+	        Chris Stewart <chris@suredbits.com>
     Comments-Summary: No comments yet.
     Comments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-???????
     Status: Draft
     Type: Standards Track
     Created: 2017-10-24
-    License: PD
-
-Reminder: Double brackets "{{" and "}}" surround parts that are "unfinished".
-
+    License: BSD-2-Clause
 
 Abstract
 ==========
@@ -33,9 +30,14 @@ BMM actually is a process that spans two or more chains. For an explanation of t
 
 To support BMM, the mainchain is asked to accomplish two goals:
 1. Track a set of ordered hashes (the merged-mining).
-2. Allow miners to "sell" the act of finding a sidechain block (through the use of a new OP CODE -- OP CheckBribeVerify).
+2. Allow miners to "sell" the act of finding a sidechain block (through the use of a new extended serialization transaction type).
 
-These goals are accomplished by forcing nodes to validate three new messages (M7, M8, and M9), and track data in one new database (D3).
+These goals are accomplished by forcing nodes to validate two new messages (M7, M8), and track data in one new database (D3).
+
+Copyright
+==========
+
+This BIP is licensed under the BSD 2-clause license.
 
 
 Motivation
@@ -43,10 +45,10 @@ Motivation
 
 Regular "Merged-Mining" (MM) allows miners to reuse their hashing work to secure other chains (for example, as in Namecoin). However, traditional MM has two drawbacks:
 
-1. Miners must run a full node of the other chain. (This is because [while miners can effortlessly create the block] miners will not get paid unless the block that they mrg-mined is a valid one. Therefore, miners must assemble a valid block first, then mrg-mine it.)
-2. Miners are paid on the other chain, not on the regular BTC mainchain. For example, miners who mrg-mine Namecoin will earn NMC (and they will need to sell the NMC for BTC, before selling the BTC in order to pay for electricity.)
+1. Miners must run a full node of the other chain. (This is because [while miners can effortlessly create the block] miners will not get paid unless the block that they merge mine is a valid one. Therefore, miners must assemble a valid block first, then merge mine it.)
+2. Miners are paid on the other chain, not on the regular BTC mainchain. For example, miners who merge mine Namecoin will earn NMC (and they will need to sell the NMC for BTC, before selling the BTC in order to pay for electricity).
 
-Blind Merged-Mining (BMM) attempts to address those shortcomings.
+Blind Merged-Mining (BMM) attempts to address both shortcomings.
 
 
 Specification
@@ -54,17 +56,18 @@ Specification
 
 Note: This document uses the notation side:\* and main:\* in front of otherwise-ambiguous words (such as "block", "node", or "chain").
 
-As stated above, we have two goals: [1] create and monitor an alt-chain (defined only by a deterministic list of hashes), and [2] allow miners to "sell" the act of finding a sidechain block (through the use of a new OP CODE -- OP CheckBribeVerify).
+As stated above, we have two goals: [1] create and monitor an alt-chain (defined only by a deterministic list of hashes), and [2] allow miners to "sell" the act of finding a sidechain block (through the use of a new extended serialization transaction type).
 
-### Critical Sidechain Info ("Sidechain Mini-Header")
+### Sidechain Critical Data ("Sidechain Mini-Header")
 
-Specifically, per side:block per side:chain, we track the following 35 bytes of information:
+Specifically, per side:block per side:chain, we track the following 34 bytes of information:
 
-    1-byte   - ChainIndex (known as "Account Number" in hashrate-escrows.md , or as "Sidechain Number")
-    32-bytes - sideHeaderHash (also known as "h*", conceptually this is a hashMerkleRoot [or the blockHash, aka prevBlockHash of *this* block] with arbitrarily greater flexibility)
-    2-bytes  - prevBlockRef (an index which points to this side:block's parent side:block)
+    1-byte   - ChainIndex ("Account Number" in hashrate-escrows.md, "Sidechain Number (nSidechain) in the code")
+    1-byte   - prevBlockRef (an index which points to this side:block's parent side:block)
+    32-bytes - sideHeaderHash (also known as "h*" / hashCritical, the hash of the sidechain block)
 
-The **ChainIndex** keeps data organized when there are multiple sidechains. It serves a similar function to Bitcoin's "magic bytes". The **sideHeaderHash** determines the data that each side:block is expected to contain. It serves a similar function to Bitcoin's "hashMerkleRoot". The **prevBlockRef** forces the set of headers into a blockchain structure. It is most similar to Bitcoin's hashPrevBlock.
+
+The **ChainIndex** indicates which sidechain this critical data is relevant to. As we may eventually have more than one sidechain, this serves as an identifier similar to the Bitcoin network's magic bytes (0xF9BEB4D9). Drivechains however only need to use 1 byte for the identifier (there is a hard limit of 256 sidechains identified as 0-255). The **sideHeaderHash** is the hash of a side:block which will receive PoW via BMM. The **prevBlockRef** forms the set of headers into a blockchain structure by making the headers refer to a previous header. It is most similar to Bitcoin's hashPrevBlock.
 
 Where does this data come from, and how does it get around?
 
@@ -72,17 +75,15 @@ Where does this data come from, and how does it get around?
 
 ##### Creation
 
-By the time Blind Merged Mining can take place, the ChainIndex is globally known (it is the "Account Number" in D1 [see previous BIP]).
+By the time Blind Merged Mining can take place, the ChainIndex is globally known (it is the "Account Number" in D1 [see previous BIP]). Each sidechain, when activated by soft fork, will take one of the 0-255 available indexes.
 
-The other two items, sideHeaderHash and prevBLockRef, are created by sidechain nodes. sideHeaderHash is quite straightforward -- side:nodes build side:block-headers, and take the hash of these.
+The other two items, sideHeaderHash and prevBlockRef, are created by sidechain nodes. sideHeaderHash is quite straightforward -- side:nodes build side:blocks, and take the hash of these.
 
-The final item, prevBlockRef, is a little more complicated. It is an integer that counts the number of "skips" one must take in the side:chain in order to find the current side:block's parent block. In practice, this value will almost always be zero. It will only be a value other than zero, in cases where invalid sidechain blocks have been mined, or when a side:node intentionally wants to orphan some side:blocks (if a side:node wants to orphan the most-recent N blocks, the value of the current block will be equal to N ; in the block after that it will be back to zero).
+The final item, prevBlockRef, is a little more complicated. It is an integer that counts the number of "skips" one must take in the side:chain ratchet in order to find the side:block's parent block. In practice, this value will almost always be zero. It will only be a value other than zero when invalid sidechain blocks have been mined, or when a side:node intentionally wants to orphan some side:blocks (if a side:node wants to orphan the most-recent N blocks, the value of the current block will be equal to N ; in the block after that it will be back to zero).
 
 ![dots-image](https://github.com/drivechain-project/docs/blob/master/images/bmm-dots-examples.png?raw=true)
 
-Since the hashes themselves are already ordered by the mainchain, tracing the blockchain's path by index (prevBlockRef) will be the same as tracing it by identifying a list of hashes. In other words, the ordering given via each side:block's "prevBlockRef" will be isomorphic to an ordering given by each side:block's "prevSideHeaderHash" ... if "prevSideHeaderHash is defined to be the sidechain's equivalent of the mainchain's "prevBlockHash". It will be possible to freely convert from one to the other, and we will exploit this later in the "bribe" payment, M8.
-
-M8 will ultimately come in two versions. The second version is specialized for use in the Lightning Network and must use the full 32-byte prevBlockHash (ironically, this larger transaction is likely to be off-chain and ultimately much cheaper for the Bitcoin network to process). The first version of M8, in contrast, cannot be used inside the Lightning Network but will only require the 2-byte prevBlockRef. It is important to have both, because some side:nodes may be unwilling or unable to open a channel with each main:miner.
+Since the hashes themselves are already ordered by the mainchain, tracing the blockchain's path by index (prevBlockRef) will be the same as tracing it by identifying a list of hashes. In other words, the ordering given via each side:block's "prevBlockRef" will be isomorphic to an ordering given by each side:block's "prevSideHeaderHash" ... if "prevSideHeaderHash is defined to be the sidechain's equivalent of the mainchain's "prevBlockHash". It will be possible to freely convert from one to the other. See M8 to learn more about how these hashes are requested by sidechain block creators to be included in the mainchain.
 
 Now that we know what our critical data is, and how it is made, how is this data broadcast and stored?
 
@@ -94,225 +95,127 @@ Mainchain nodes are going to need this data later, so it must be easy to find. W
 
 Thus, (for n sidechains) we have a coinbase output with:
 
-    1-byte - OP_RETURN (0x6a)
-    1-byte - Push the following (4+(n*35)) bytes (0x??)
-    4-byte - Message header (0x????????)
-    (4+(n*35))-byte - A sequence of bytes, of the three items directly mentioned above ("Sidechain Mini-Header").
+    1-byte    - OP_RETURN (0x6a)
+    4-bytes   - Identifying flag bytes / message header
+    32-bytes  - h*
+    5~7-bytes - the rest of the Sidechain Mini-Header
 
-
-This data is parsed by laying it in sequential 35-byte chunks (any remaining data --ie, some final chunk that is less than 35 bytes in length-- has no consensus meaning).
-
-Each 35-byte chunk is then parsed to obtain the data outlined above (in "Description"). If two 35-byte chunks being with the same "Sidechain number" (ie, if the two chunks have the same first byte), then only the first chunk has consensus meaning.
+This can be an individual output for each sidechain, {{ or to save some amount of block space we can combine the information for each sidechain into a single scriptPubKey. Doing this means that we wont be duplicating the OP_RETURN prefix or identifying flag bytes. This would take up 9,479 bytes for 256 sidechains assuming that 5 bytes are used for the Critical Data bytes (non h* parts of the Sidechain Mini-Header). Conveniently just below the 10 KB scriptPubKey size limit }}
 
 We are left with, at most, one  (h\*, prevBlockRef) pair per sidechain per block. This data is added directly to D3, a new database.
 
 
 #### D3 -- "RecentSidechains_DB"
 
-To suit our purposes, the mainchain full nodes will need to keep track of the most recent 8000 (h\*, prevBlockRef) pairs.
+To suit our purposes, the mainchain full nodes will need to keep track of the most recent 4000 (h\*, prevBlockRef) pairs.
 
 Therefore, D3 would look something like this:
 
 
-           BlockHeight  CB_Index    SC_1   Blks_Atop_1   SC 2   Blks_Atop_2   SC 3   Blks_Atop_3
-            ---------    ------    ------   ---------   ------   ---------   ------   ---------
-       1.    401,005        2      (h*, 0)     7985     (h*, 0)        1     (h*, 0)        0
-       2.    401,006        4      (h*, 0)     7984     (h*, 0)        0     (h*, 1)     7801
-       3.    401,007        2      (h*, 0)     7983     (h*, 5)     2027     (h*, 0)        0
-       4.    401,008        2      (h*, 0)     7982     (h*, 0)     2028     (h*, 1)     7800
-      ...     ...                                                                  )
-    7999.    409,003        3      (h*, 0)        1     (h*, 0)        0     (h*, 0)        1
-    8000.    409,004        2      (h*, 0)        0     (h*, 1)        0     (h*, 0)        0
+           BlockHeight    SC_1    Blks_Atop_1   SC 2    Blks_Atop_2   SC 3    Blks_Atop_3
+            ---------    ------   ---------    ------   ---------    ------   ---------
+       1.    401,005     (h*, 0)     7985      (h*, 0)        1      (h*, 0)        0
+       2.    401,006     (h*, 0)     7984      (h*, 0)        0      (h*, 1)     7801
+       3.    401,007     (h*, 0)     7983      (h*, 5)     2027      (h*, 0)        0
+       4.    401,008     (h*, 0)     7982      (h*, 0)     2028      (h*, 1)     7800
+      ...     ...
+    3999.    409,003     (h*, 0)        1      (h*, 0)        0      (h*, 0)        1
+    4000.    409,004     (h*, 0)        0      (h*, 1)        0      (h*, 0)        0
 
 
 When new sidechains (or "hashrate escrows") are soft-forked into existence, a new column is added to D3 (to contain any BMMing that might be done on it).
 
-D3 also contains a column for each sidechain called "Blocks Atop", which computes how many side:blocks are "on top" of the current side:block. These might be regarded as "side:confirmations" (pseudo-confirmations that are specific to each sidechain).
+For each sidechain we also track the field "Blocks Atop". This is the number of side:blocks that are "on top" of the specified side:block. These might be regarded as "side:confirmations" (pseudo-confirmations that are specific to each sidechain).
 
 D3 also contains a column (not shown) for each sidechain containing "prevSideBlockHash". This value is is either derived from prevBlockRef; or else it is given explicitly (in which case it is the converse: prevBlockRef is derived from prevSideBlockHash).
 
+#### Coinbase Cache
+To efficiently keep track of the above data, without having to constantly load entire blocks (4,000 of them) from disk, we temporarily cache enough coinbases in the chain index to maintain D3.
 
-#### New Validation Rules
+### M8 -- Paying miners to include BMM data in their coinbase outputs
 
-As mentioned above, M7s cause data to be added to D3. Recent D3 data is tracked by all mainchain nodes for a period of time.
+This section introduces a new type of transaction, which allows sidechain block creators to request, and pay for, a critical hash to be included in a specific block by mainchain miners. See [the Blind Merged Mining spec](http://www.truthcoin.info/blog/blind-merged-mining/). This txn allows miners to "sell" the act of mining a sidechain block. By taking advantage of this option, miners earn tx fees for mining sidechains...truly "for free". They do not even need to run sidechain nodes, and the tx-fees they earn are in mainchain BTC. As a result, sidechains affect all miners equally and do not affect the mining ecosystem.
 
-Specifically, each mainchain node tracks, per sidechain, the last 8000 M7s {{ although, here I have it as the last 8000 main:blocks ... not sure which is better }}. In addition, node software must update the BlocksAtop value for all the Row's entries. This can be done in two easy steps: First, set the new entry to a BlocksAtop value of "0" (which is correct by definition). Second, scroll backwards through all of the prevSideBlockHash-es, and add 1 to the BlocksAtop value of everything in this 'chain'. {{possibly an index column could make this even easier}}
-
-
-### M8 and M9 -- Arranging the Payments
-
-This section introduces a new type of transaction, the so-called "bribe" of [the Blind Merged Mining spec](http://www.truthcoin.info/blog/blind-merged-mining/). This txn allows miners to "sell" the act of mining a sidechain block. By taking advantage of this option, miners earn tx fees for mining sidechains...truly "for free". They do not even need to run sidechain nodes, and the tx-fees they earn are in mainchain BTC. As a result, sidechains affect all miners equally and do not upset the mining ecosystem.
+M8 will ultimately come in two versions. The second version will be specialized for use in the Lightning Network and must use the full 32-byte prevBlockHash (ironically, this larger transaction is likely to be off-chain and ultimately cheaper for the Bitcoin network to process). The first version of M8, in contrast, cannot be used inside the Lightning Network but only requires a single byte prevBlockRef to maintain chain order. It is important to have both, because some side:nodes may be unwilling or unable to open a payment channel with each main:miner even though eventually it seems that the lightning version will be preferred.
 
 #### Setup
 
-We define **"Mary"** as a mainchain miner, and **"Simon"** as a sidechain node.
+We define **"Mary"** as a mainchain miner, and **"Simon"** as a sidechain node / sidechain block creator.
 
 The goal is to construct a payment from Simon to Mary, such that:
 
-1. If *'conditions_1'* are met, **Mary** can claim the money with finality.
-2. If, instead, the *'timeout_condition'* is met, **Simon** can reclaim the money.
+1. If the critical data conditions are met, **Mary** can claim the outputs of the transaction with finality.
+2. If the critical data conditions are not met, the outputs become immediately available again to **Simon**.
 
-Note: see https://lightning.network/ for info about how this is often done.
-
-Simon will use M8 to pay into a "Bribe Escrow" txn. Mary will later withdraw the money from M8 using with M9. M9 will meet the requirements of our new OP code.
-
-( Else, Mary will be unable to claim the money, and after the timeout condition is met, it will be exactly as if Simon has merely made a payment to himself. He will ultimately be able to regain access to the funds, this txn might be regarded as an "M9" but at this point it makes no practical difference. )
+<!--
+Simon will use M8 to create a payment (think escrow) where the payment only goes through if the terms Simon has requested are met. For BMM specifically, this means that Simons is entering a contract to pay mainchain miner Mary if and only if the critical hash Simon has requested is published in the coinbase of the exact block that Simon wants this hash committed in. Mary will be able to create an output for herself using Simon's escrowed bitcoin. Although Mary will likely spend this in the very same block, the output will have a maturity period of 100 blocks on the mainchain as well as at least 100 blocks atop of this critical hash in the ratchet system. See "Forward Progress (The Need for a "Ratchet")" for more details about the ratchet system and blocks atop. -->
 
 
-#### Goals (this is rather philosophical, and skippable)
-
-##### Immediate Expiration ("Fill-or-Kill")
-
-We would like to make special guarantees to the counterparties of this transaction. Specifically, instead of Simon making a "payment" to Mary, we prefer that Simon give Mary an "offer" (which she can either accept or decline).
-
-Crucially, we want Simon to safely make many offers to several different Mary's, in realtime (ie, quickly and off-chain). However, we ultimately want only one offer to be accepted, at most. In other words, we want Simon's offers to *immediately expire*. If only one offer can become a bona fide transaction, then Simon will feel comfortable making offers all day long. Because all of the Simons are making many offers, the Marys collectively gain access to a large set of offers to choose from.
+If the conditions are not met, Mary will be unable to claim the money. The transaction will be removed from the mempool (which may end up being a second mempool of its own). This transaction is only valid for a certain block height, immediately after that the transaction becomes invalid. The outputs will be returned to Simons wallet as if they had expired in the mempool after waiting too long (this is relevant specifically to the wallet GUI).
 
 ##### Forward Progress (The Need for a "Ratchet")
 
-<!--  Too Long!
+The "ratchet" concept is an attempt to harmonize incentives among the main and side chain(s). In Bitcoin, miners must meet another condition besides the well known PoW requirement in order to get paid: the block that they find must be followed by 100 child blocks (coinbase maturity). This incentivizes all miners to focus on the global chain health, and work towards building blocks from the chain tip.
 
-The "ratchet" concept is an attempt to harmonize incentives among the main and side chains. In regular mainchain Bitcoin, miners are paid to find blocks, as is commonly known. However, less commonly known is that miners must meet another condition in order to get paid: the block that they find must be followed by 100 blocks. This helps keep miners focused on the global chain health, in addition to their local obsession with finding the next block.
-
-We will need to ensure that the sidechain is making "forward progress", without tracking too much about the sidechain (see [1] and [2]) and while still allowing the sidechain to reorganize [3].
+We will need to ensure that the sidechain is making "forward progress" as well, without tracking too much about the sidechain such that we burden Bitcoin (see [1] and [2]) all while still allowing the sidechain to reorganize [3].
 
 * [1] https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2017-July/014789.html
 * [2] http://www.drivechain.info/faq/index.html#what-is-the-difference-between-drivechain-and-extension-blocks
 * [3] http://www.truthcoin.info/blog/blind-merged-mining/#handling-reorganizations
 
+Bitcoin and sidechains must cooperate (and move both chains forward) to achieve the mutual goal of being paid for their work. Therefore the ratchet system must keep track of sidechain "mini-headers" (see Sidechain Critical Data ("Sidechain Mini-Header")) and count the "blocks atop" maturity of the related side:blocks. By requiring side:block maturity without actually making the mainchain track the side:blocks we encourage progress of both the main and side chains, without placing undue burden on any miner (again, they don't even need to run a sidechain node to profit from this).
 
-Note: The two chains (main, and side) cooperate to achieve this mutual goal. While the mainchain enforces the new rules described here, each sidechain enforces its own rules (not described here). However, we plan on each sidechain using two rules in particular: first, the sidechain [a] knows exactly where to look for these hashes (and, therefore, will always be able to find one unique has per mainchain block) and the sidechain also [b] accepts this hash as being equal to "a prevBlockHash which meets the [side]chain's difficulty target". Second, the sidechain [a] knows exactly where to look for the prevBlockRef, and [b] interprets the main:chain-sourced prevBlockRef to actually define the side:block's side:parentblock.
--->
+Simon's offer to Mary to include a critical hash in exchange for payment must be *atomic*. The "ratchet" concept helps to construct a very tight connection between two things:
 
-Simon's bribe offer must be *atomic*. The "ratchet" concept helps to construct a very tight connection between two things:
-
-1. The sidechain-block-generator "Simon" paying himself the side:block's side:tx-fees (which he receives in 100 sidechain blocks hence).
+1. The sidechain-block-generator "Simon" paying himself the side:block's side:tx-fees (which he receives in 100 sidechain block atop hence).
 2. "Simon" making a mainchain main:btc payment to a mainchain miner "Mary".
 
 Either both of the two should succeed, or else both should jointly fail.
 
-However, absent our intervention, there are cases in which the second thing [bribe] succeeds but the first thing [side:tx-fees] fails. One such case is when a side:block contains unusually high side:tx-fees. Here, there will be many candidate bribes submitted to Mary, but only one can be included in each main:block. Without an incentive to make "forward progress", Mary is likely to include one of these large bribes in the next main:block (and the main:block after that, and so on). Mary will "blindly" include high-paying bribes for *older* blocks, unless something prevents her from doing so.
+However, absent our intervention, there are cases in which [2, the payment to Mary] succeeds but [1, side:tx-fees] fails. One such case is when a side:block contains unusually high side:tx-fees. Here, there will be many requests to include a critical hash in exchange for payment submitted to Mary, but only one can be included in each main:block per sidechain. Without an incentive to make "forward progress", Mary is likely to include one of the highest paying requests in the next main:block (and the main:block after that, and so on). Mary will "blindly" include high-paying requests for *older* blocks, unless something prevents her from doing so.
 
-To address these, we utilize the concept of "Blocks_Atop" (the "side:confirmations") that we mentioned earlier. Our new OP Code will refuse to main:pay Mary until the side:block in question is buried by X=100 child side:blocks. At this future time, both Mary and Simon will get paid simultaneously.
+To address these potential issues, we utilize the concept of "Blocks_Atop" (the "side:confirmations") that we mentioned earlier. As previously mentioned, Mary will not be able to spend Simon's M8 payment until satisfying the blocks atop (side:confirmations) requirement.
 
+#### M8 -- The two forms of M8 transactions
 
-#### M8 -- Pay to Bribe Escrow (The "Bribe")
+As previously mentioned, M8 can take two forms. The first does not require the Lightning Network, but does require our new transaction type (see above) which has new validation rules including the requirement to be immediately included in the exact block requested, otherwise becoming invalid. The second form inherits immediate expiration from the Lightning Network itself, but requires extra preparation and a different/larger message.
 
-M8 pays from Simon into a "Bribe Escrow". (M9, below, withdraws from this escrow.)
+Both forms require that certain Critical Data will be committed to within the coinbase of the block that the
+transaction is included in. For the non Lightning version, we have created a new extended serialization transaction type (very similar to how segwit handles witness data (the witness stack)).
 
-As previously mentioned, M8 can take two forms. The first does not require the Lightning Network, but it does have new requirements for Immediate Expiration (see above). The second inherits Immediate Expiration from the Lightning Network itself, but requires extra preparation and a different/larger message.
+##### M8_V1 - Critical Data format with no Lightning Network
 
-##### M8_V1 - No Lightning Network
+Critical data structure for non Lightning use:
+    5~7-bytes - (Identifying flag bytes, ChainIndex, prevBlockRef)
+    32-bytes  - h* side:block hash
 
-In the first version of M8, we need to introduce the concept of Immediate Expiration (see above). In other words, we need a way for Simon to construct many payments to multiple Marys, such that only one of these is ever included; and only then if Simon's txn is expected to coincide with the finding of Simon's side:block.
-
-We do this by imposing validity-rules on the txn itself:
+We impose the following validity-rules for these critical data txn(s):
 
 1. The txn's content, when examined, must match part of the main:block's content. Specifically, the (ChainIndex, h\*) pair of the txn, must match one of the (ChainIndex, h\*) pairs in the M7 of this main:block.
-2. Only one bribe per ChainIndex per main:block. In other words, if 400 people all try to bm-mine the sidechain with ChainIndex==4, then not only is it the case that only one side_4:block can be found, but it is also the case that only the corresponding M8 txn can be included (out of all of the 400 M8s which are for ChainIndex==4).
-3. Simon's txns must only be valid for the current block; afterward, they immediately expire. This is because Simon's intended prevBlockRef may change from one main:block to the next.
+2. Only one payment per sidechain per main:block is valid. In other words, if 400 people all try to bm-mine the sidechain with ChainIndex==4, then not only is it the case that only one side_4:block can be found, but it is also the case that only the corresponding M8 txn can be included (out of all of the 400 M8s which are for ChainIndex==4).
+3. Simon's txns must only be valid for the current block; afterward, they immediately expire. This is because Simon's intended prevBlockRef & side:block contents will most likely change from one main:block to the next.
 
-To impose new requirements on the transaction level (not the block level nor the TxOutput level), we borrow the "flag" trick from SegWit style transactions. If the flag is present, the transaction is examined for extra data, and if this data does not pass certain requirements, the transaction is invalid. With SegWit, this extra data is the signatures, and the extra requirements are the signatures' locations and validity. In the BMM-transactions, the extra data is the (ChainIndex, h\*) pair, which must meet the first two requirements (above) as well as the main:blocknumber, which must meet the third requirement (above).
+To impose new requirements at the transaction level, we make use of the extended serialization transaction format introduced by Segwit. If a dummy vin bit is present, we check which flag has been set. If the flag is set to 2 (0010), the transaction contains Critical Data and requires that our new validation rules be met in order for the txn to be valid in a block. Unless all of the requirements for sidechain critical data transactions are met by the block it is included in, the transaction is invalid. With SegWit, this extra data is the segwit signature stack, and the extra requirements are the signatures' locations and validity. In the sidechain BMM critical data transactions, the extra data is the (ChainIndex, h\*) pair, which must meet the first two requirements (above) as well as the main:blocknumber, which must meet the third requirement (above). Note The main:blocknumber does not take up any additional space compared to a normal txn, as we reuse the locktime field for our purposes.
 
 ![extra-data-image](https://github.com/drivechain-project/docs/blob/master/images/witness-vs-critical.png?raw=true)
 
-This txn structure conserves main:blockspace, because it is the easiest way to refer to a previous sidechain block in 4 bytes, (prevBlockRef + FoK_nLockTime). Instead, we would need to use at least 32 bytes (prevSideBlockHash).
+These types of transactions have slightly different mempool behavior, and should probably be kept in a second mempool. These txns are received, checked immediately, and if valid they are evaluated for inclusion in a block. If they are not able to be included in the specific requested block (if the block height requested has been surpassed by the chain tip), they are discarded. In fact, after any main:block is found, everything in this "second mempool" can be discarded as new payments will be created immediately for the next block height. (This includes cases where the blockchain reorganizes.) There is no re-evaluation of the txns in this mempool ever -- they are evaluated once and then either included or discarded. To be clear, when the transaction is received we are able to evaluate its validity, and do not need to rescan these transactions again, they are simply discarded when we move on to the next block.
 
-These types of transactions have slightly different mempool behavior, and will probably be need to be kept in a second mempool. These txns are received, checked immediately, and if valid they are evaluated for inclusion in a block. If they are not included in the current block, they are discarded. In fact, after any main:block is found, everything in this "second mempool" should be discarded immediately. (This includes cases where the blockchain reorganizes.) There is no re-evaluation of the txns in this mempool -- they are evaluated once and then either included or discarded.
+These payments (M8) will *always* be directed specifically to miners and nobody else. Therefore, non-mining nodes do not need to keep them in any mempool at all. Non-miner nodes can just wait for a block to be found, and check the txn then. These transactions more resemble a stock market's pit trades (in contrast, regular Bitcoin txns remind me more of paper checks).
 
-Interestingly, these payments will *always* be from non-miners to miners. Therefore, non-mining nodes do not need to keep them in any mempool at all. Non-miner nodes can just wait for a block to be found, and check the txn then. These transactions more resemble a stock market's pit trades (in contrast, regular Bitcoin txns remind me more of paper checks).
+##### M8_V2 Critical Data format when using Lightning network
 
-We will discuss M9 next (both versions, as they are very similar), before returning to M8_V2.
+    4-bytes - Identifying flag bytes
+    1-byte  - M8 Version (in this case, equal to "2")
+    65-byte - 'Big' Sidechain Mini-Header (1+32+32); This consists of: (ChainIndex, h*, prevSideBlockHash)
 
-#### M9 -- Spending an OP CheckBribeVerify
-
-##### M9_V1 -- No Lightning Network
-
-When Simon constructs M8_V1, one of the TxOutputs is a payment to Mary, and this payment is locked with a new OP Code, "OP CheckBribeVerify" (CBV).
-
-OP_CBV behaves very similarly in V1 and V2, but not identically. In V1, the contents are:
-
-    1-byte -- OP CheckBribeVerify
-    1-byte -- Bribe Version (in this case, equal to "1")
-    35-byte -- 'Regular' Sidechain Mini-Header (1+32+2); Recall that this consists of: (ChainIndex, h*, prevBlockRef)
-
-##### M9_V2 -- Within Lightning Network
-
-In V2, OP_CBV contains:
-
-    1-byte -- OP CheckBribeVerify
-    1-byte -- Bribe Version (in this case, equal to "2")
-    35-byte -- 'Big' Sidechain Mini-Header (1+32+32); This consists of: (ChainIndex, h*, prevSideBlockHash)
-
-In both cases, M9 can only be included in a main:block (ie, can only avoid evaluating to a FALSE script outcome) if [1] the Sidechain Mini-Header info is currently present in D3 (of this main:block) and [2] the relevant entry in D3 has a "Blocks_Atop" value of at least 100.
-
-M9 is relatively simple -- most of the work is done already by D3. Now we return to M8, version 2.
-
-
-#### M8 Again (Lightning Network)
-
-To someone familiar with the Lightning Network, a second, LN-compatible version of M8 will emerge naturally from M9_V2.
-
-However, use of M8_V2 (below) requires having a LN-channel open with a miner. This may not always be practical (or even possible), especially today.
-
-##### M8_V2
+M8_V2 requires having a LN-channel open with a miner. This may not always be practical (or even possible), especially today.
 
 Notice that, in M8_V1, Simon could reuse the same h\* all he wanted, because only one M8_V1 could be included per main:block per sidechain. However, on the LN no such rule can be enforced, as the goal is to push everything off-chain and include *zero* M8s. So, we will never know what the M8s were or how many had an effect on anything.
 
 Therefore, Simon will need to ensure that he **gives each Mary a different h\***. Simon can easily do this, as he controls the side:block's contents and can simply increment a nonce -- this changes the side:block, and changes its hash (ie, changes h\*).
 
-With a unique h\* per Mary, and at most 1 h\* making it into a block (per sidechain), we can guarantee that M9_V2 will always fail for at least m-1 Marys (if there are m total). Furthermore, if this Simon's block is not found, M9_V2 will fail for all pairings of (this Simon, every Mary), because none of the h\* in question have ever made it into D3 (which is always on-chain).
-
-That's probably confusing, so here is an example, in which: Simon starts with 13 BTC, Mary starts with 40 BTC, the side:block's tx-fees currently total 7.1 BTC, and Simon is keeping 0.1 BTC for himself and paying 7 BTC via bribe.
-
-We start with (I):
-
-    Simon 13 in, Mary 40 in ; 53 in total
-        Simon's version [signed by Mary]
-            13 ; to Simon if TimeLock=over; OR to Mary if SimonSig
-            40 ; to Mary
-        Mary's version [signed by Simon]
-            40 ; to me if TimeLock=over; OR to Simon if MarySig
-            13 ; to Simon
-
-
-And both parties move, from there to "M8_V2" (II):
-
-    Simon 13 in, Mary 40 in ; 53 in total
-        Simon's version [signed by Mary]
-            6 ; to Simon if TimeLock=over; OR to Mary if SimonSig
-            40 ; to Mary
-            7 ; to Mary if CheckBribeVerify(bI,h*,pSBH); OR to Simon if LongTimeLock=over
-        Mary's version [signed by Simon]
-            40 ; to Mary if TimeLock=over; OR to Simon if MarySig
-            6 ; to Simon
-            7 ; to Mary if CheckBribeVerify(bI,h*,pSBH); OR to Simon if LongTimeLock=over
-
-From here, if the h\* side:block in question is BMMed, they can proceed to (III):
-
-    Simon 13 in, Mary 40 in ; 53 in total
-        Simon's version [signed by Mary]
-            6 ; to Simon if TimeLock=over; OR to Mary if SimonSig
-            47 ; to Mary
-        Mary's version [signed by Simon]
-            47 ; to me if TimeLock=over; OR to Simon if MarySig
-            6 ; to Simon
-
-Although, if Simon proceeds immediately, he removes the protection of the 'ratchet'. Ie, Simon removes Mary's incentive to care about blocks being built on this side:block. If Simon's side:block is orphaned, he loses his 7 BTC. Simon can either play it safe, and wait the full 100 side:blocks before moving on (ie, moving on to the third LN txn, above); or else Simon can take the risk if he feels comfortable with it.
-
-If the h\* side:block is not found, then (II) and (III) are basically equivalent to each other. Simon and Mary could jointly reconstruct (I) and go back there, or they could proceed to a new version of II (with a different h\*, trying again with new side:block in the next main:block).
-
-<!-- obsolete
-
-##### Notes / Improvements
-
-* To discourage Mary from locking up Simon's money in an inconvenient way, we could force Mary to also send a very small amount of her money into the transaction -- much less than she is being paid, but enough to reimburse Simon for the inconvenience of having his money locked away temporarily. This has the added benefit of making Simon care less about having his money unfairly locked up -- we can increase the timeout period from 500 main:blocks to a larger number.
-* As usual, Simon and Mary can utilize the lightning network, such that their txns never needs to make it onto the chain, unless there is a dispute.
-
-
--->
-
-
-
+With a unique h\* per Mary, and at most 1 h\* making it into a block (per sidechain), we can guarantee that only one of the M8_V2's critical data can be committed to in a single main:block. Only one M8_V2 will be valid in any main:block and by giving each miner (who Simon has a payment channel open with) a different h*, Simon can figure out which miner followed through with the commit, and know that only one such commit went through. Furthermore, if this Simon's requested critical data is not found in a block, none of the M8_V2 payments will be spendable by the Mary(s), because none of the h\* in question have ever made it into D3 (which is always on-chain) and no blocks atop will be accumulated.
 
 Deployment
 ===========
@@ -343,10 +246,4 @@ References
 Thanks
 =========
 
-Thanks to everyone who contributed to the discussion, especially: ZmnSCPxj, Adam Back, Peter Todd, Dan Anderson, Sergio Demian Lerner, Matt Corallo, Sjors Provoost, Tier Nolan, Erik Aronesty, Jason Dreyzehner, Joe Miyamoto.
-
-
-Copyright
-==========
-
-This document is placed in the public domain.
+Thanks to everyone who contributed to the discussion, especially: ZmnSCPxj, Adam Back, Chris Stewart, Peter Todd, Dan Anderson, Sergio Demian Lerner, Matt Corallo, Sjors Provoost, Tier Nolan, Erik Aronesty, Jason Dreyzehner, Joe Miyamoto.
