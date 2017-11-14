@@ -1,5 +1,5 @@
     Drivechain Documentation -- Hashrate Escrows
-    Paul Sztorc 
+    Paul Sztorc
     October 23, 2017
     Document 2 of 3
     v4.0
@@ -18,7 +18,7 @@ Header
     Status: Draft
     Type: Standards Track
     Created: 2017-08-14
-    License: PD
+    License: BSD-2-Clause
 
 
 Abstract
@@ -36,7 +36,7 @@ In practice these escrows are likely to be "asymmetric sidechains" of Bitcoin (s
 
 Sidechains have potential benefits, including:
 
-1. Protect Bitcoin from competition from altcoins and spinoffs. Safely allow competing implementations (of *sidechains*). 
+1. Protect Bitcoin from competition from altcoins and spinoffs. Safely allow competing implementations (of *sidechains*).
 2. Protect Bitcoin from hard fork campaigns. (Such campaigns represent an existential threat to Bitcoin, as well as an avenue for developer corruption.)
 3. Help with review, by making it must easier for reviewers to ignore bad ideas.
 4. Provide an avenue for good-but-confusing ideas to prove their value safely.
@@ -55,7 +55,7 @@ Hashrate Escrows are built of two types of component: [1] new databases, and [2]
 ##### 1. New Databases
 
 * D1. "Escrow_DB" -- a database of "accounts" and their attributes.
-* D2. "Withdrawal_DB" -- a database of pending withdrawals from these accounts, and their statues.
+* D2. "Withdrawal_DB" -- a database of pending withdrawals from these accounts, and their statuses.
 
 ##### 2. New Messages
 
@@ -94,10 +94,10 @@ Field No. | Label | Bytes | Type | Description / Purpose
 8 | Threshold Given | 1 | uInt | This is interpreted as a percentage, but "per 256" (instead of per 100), and will be used later to regulate withdrawals. A higher value indicates that more hashrate is needed to withdraw from the escrow. As a result, higher values are more secure but may also be "too secure" (with even valid withdrawals often failing).
 9 | Threshold Calc\* | 2 | uInt | This is derived by taking f(x,y) = ceiling(x*[y/256]) of fields (#6, #7). It could be interpreted as: total number of "AckBlocks" needed, out of total number of "Voting Period" blocks. This interpretation is similar to Bit-signaling.
 10 | "CTIP" -- Part 1 "TxID"\* | 32 | hex | The CTIP, or "Critical (TxID, Index) Pair" is a variable for keeping track of where the escrow's money is (ie, which member of the UTXO set).
-11 | "CTIP" -- Part 2 "Index"\* | 4 | hex | Of the CTIP, this is second element of the pair: the Index. See #10 above. 
+11 | "CTIP" -- Part 2 "Index"\* | 4 | hex | Of the CTIP, this is second element of the pair: the Index. See #10 above.
 
 
-\* Denotes a "convenience field", the entry for this field is derived from other fields, or from the blockchain-state itself. The escrow-creator does not need to provide these values in M1 (or anywhere). 
+\* Denotes a "convenience field", the entry for this field is derived from other fields, or from the blockchain-state itself. The escrow-creator does not need to provide these values in M1 (or anywhere).
 
 Escrow_DB requires 230 bytes [1+120+32+32+2+2+1+2+2+32+4] for each escrow in the main blockchain. Of these, 72 bytes [32+2+2+32+4] are merely for convenience. Therefore, a sidechain is defined (see "M1") by 158 bytes of information.
 
@@ -238,7 +238,7 @@ If there are n Escrows and m Withdrawals-per-escrow<sup>1</sup>, then there are 
 
 First, for nodes which validate all sidechains (assuming these escrows are sidechains), this simplifies to 2^n -- these nodes only have to choose between the single honest choice (on one hand) or an abstention (on the other). Second, even for nodes that don't validate any sidechains, the number of candidates might be reduced from m^n to 3^n, by making a simplifying assumption: whichever withdrawal was most recently added/upvoted, is likely to be the one which is upvoted next.
 
-Of course, that is still O(k^n) for n sidechains, which isn't great<sup>2</sup>. If the "D2 update" cannot be guessed, it must be transmitted in some way. 
+Of course, that is still O(k^n) for n sidechains, which isn't great<sup>2</sup>. If the "D2 update" cannot be guessed, it must be transmitted in some way.
 
 Two examples for transmitting it are below:
 
@@ -291,21 +291,18 @@ From one block to the next, D2 can only be edited in a few strict ways:
 ### Depositing and Withdrawing (M5, M6)
 
 
-Both M5 and M6 are regular Bitcoin txns. They are identified by meeting an important criteria: they select a one of the Critical TxID-index Pairs (a "CTIP") as one of their inputs.
+Both M5 and M6 are regular Bitcoin txns. They are identified by meeting an important criteria: they select a one of the Critical TxID-index Pairs (a "CTIP") as one of their inputs. Deposits ("M5") are distinguished from withdrawals ("M6") by simply checking to see if money is "going in", or "out". In other words, we compare the BTC value of the original CTIP to that of new CTIP. If original <= new it is a deposit, if original > new then it is a withdrawal.
 
-Such txns are identified in {{TODO: Link to exact line of Code}}, and are forced (by consensus) to obey two additional criteria:
+The code that identifies sidechain withdrawal / deposit txns (by calculating how much value is being put into or taken out of a sidechain) can be seen here: https://github.com/drivechain-project/bitcoin/blob/mainchainBMM/src/validation.cpp#L351-L386
 
-1. They must contain an output paying "to" the Critical Address [probably in TxOut0]. {{Note about avoiding OP_CheckSig with OP True -- can't remember the status of this}}
+Such txns are forced (by consensus) to obey two additional criteria:
+
+1. They must contain an output paying "to" the Critical Address [probably in TxOut0].
 2. They must be accompanied by an update to this sidechain's Critical TxID-index Pair (CTIP). The new CTIP must be "this" txn itself.
 
-{TODO: Should be ban the "mixing of sidechains" -- cannot select any other Critical TxID as one of their inputs. This rule may not be necessary.}
-
-{TODO: These criteria are enforced in {{this part}} of {{validation.cpp}} }
+These criteria are enforced here https://github.com/drivechain-project/bitcoin/blob/mainchainBMM/src/validation.cpp#L440-L473 by checking that a deposit is paying back to the sidechain more than it is taking out, and completely rejecting any withdrawal from the mempool. And here https://github.com/drivechain-project/bitcoin/blob/mainchainBMM/src/validation.cpp#L1747-L1757 we allow for a withdrawal only once it has attained sufficient work score (ACKs).
 
 The purpose of this is to have all of the escrow's money (ie all of the sidechain's money) in one TxID, so that depositors immediately undo any UTXO bloat they may cause. This simplifies the withdrawal process, as there is no need to worry about cleaning up "dust deposits" (...and such cleaning can often result in headaches, for example where a withdrawal-txn is larger than 1MB in size, or which may only withdraw an arbitrarily limited amount of BTC). Notice that, unless we assume that an account will last forever, all utxos which are deposited must eventually be withdrawn by someone. Therefore, the relevant design criterion is not "efficiency" (total cost) but rather "who should pay" (allocation of costs).
-
-The deposits ("M5") are distinguished from the withdrawals ("M6") by simply checking to see if money is "going in", or "out". In other words, we compare the BTC value of the original CTIP to that of new CTIP. If original <= new it is a deposit, if original > new then it is a withdrawal.
-
 
 #### M5. "Make a Deposit" -- a transfer of BTC from-main-to-side
 
@@ -382,11 +379,11 @@ See http://www.drivechain.info/literature/index.html
 Credits
 =========
 
-Thanks to everyone who contributed to the discussion, especially: ZmnSCPxj, Adam Back, Peter Todd, Dan Anderson, Sergio Demian Lerner, Chris Stewart, Matt Corallo, Sjors Provoost, Tier Nolan, Erik Aronesty, Jason Dreyzehner, Joe Miyamoto.
+Thanks to everyone who contributed to the discussion, especially: ZmnSCPxj, Adam Back, Peter Todd, Dan Anderson, Sergio Demian Lerner, Chris Stewart, Matt Corallo, Sjors Provoost, Tier Nolan, Erik Aronesty, Jason Dreyzehner, Joe Miyamoto, Ben Goldhaber.
 
 
 
 Copyright
 ==========
 
-This document is placed in the public domain.
+This BIP is licensed under the BSD 2-clause license.
