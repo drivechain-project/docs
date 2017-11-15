@@ -64,7 +64,7 @@ Specifically, per side:block per side:chain, we track the following 35 bytes of 
     32-bytes - sideHeaderHash (also known as "h*" / hashCritical, the hash of the sidechain block)
     2-bytes  - prevBlockRef (an index which points to this side:block's parent side:block)
 
-The **ChainIndex** indicates which sidechain this critical data is relevant to. As we may eventually have more than one sidechain, this serves as an identifier similar to the Bitcoin network's magic bytes (0xF9BEB4D9). Drivechains however only need to use 1 byte for the identifier (there is a hard limit of 256 sidechains identified as 0-255). The **sideHeaderHash** is the hash of a side:block which will receive PoW via BMM. The **prevBlockRef** forms the set of headers into a blockchain structure by making the headers refer to a previous header. It is most similar to Bitcoin's hashPrevBlock.
+The **ChainIndex** indicates which sidechain this critical data is relevant to. As we may eventually have more than one sidechain, this serves as an identifier similar to the Bitcoin network's magic bytes (0xF9BEB4D9). Drivechains however only need to use 1 byte for the identifier (there is a hard limit of 256 sidechains identified as 0-255). The **sideHeaderHash** is the hash of a side:block which will receive PoW via BMM. It serves a similar function to Bitcoin's "hashMerkleRoot". The **prevBlockRef** forms the set of headers into a blockchain structure by making the headers refer to a previous header. It is most similar to Bitcoin's hashPrevBlock.
 
 Where does this data come from, and how does it get around?
 
@@ -104,7 +104,7 @@ We are left with, at most, one  (h\*, prevBlockRef) pair per sidechain per block
 
 #### D3 -- "RecentSidechains_DB"
 
-To suit our purposes, the mainchain full nodes will need to keep track of the most recent 8000 (h\*, prevBlockRef) pairs.
+To suit our purposes, the mainchain full nodes will need to keep track of the most recent 8000 (h\*, prevBlockRef) pairs. (This 8,000 figure is a tradeoff between decentralization (costs of running the main:node) and sidechain security -- it requires attackers to merged-mine 8,000 invalid blocks consecutively, in order to cause the sidechain to fail. The mainchain burden is minimal so this figure might be raised to 12,000 or higher.)
 
 Therefore, D3 would look something like this:
 
@@ -272,16 +272,6 @@ From here, if the h\* side:block in question is BMMed, they can proceed to (III)
 Although, if Simon proceeds immediately, he removes the protection of the 'ratchet'. Ie, Simon removes Mary's incentive to care about blocks being built on this side:block. If Simon's side:block is orphaned, he loses his 7 BTC. Simon can either play it safe, and wait the full 100 side:blocks before moving on (ie, moving on to the third LN txn, above); or else Simon can take the risk if he feels comfortable with it.
 
 If the h\* side:block is not found, then (II) and (III) are basically equivalent to each other. Simon and Mary could jointly reconstruct (I) and go back there, or they could proceed to a new version of II (with a different h\*, trying again with new side:block in the next main:block).
-
-<!-- obsolete
-
-##### Notes / Improvements
-
-* To discourage Mary from locking up Simon's money in an inconvenient way, we could force Mary to also send a very small amount of her money into the transaction -- much less than she is being paid, but enough to reimburse Simon for the inconvenience of having his money locked away temporarily. This has the added benefit of making Simon care less about having his money unfairly locked up -- we can increase the timeout period from 500 main:blocks to a larger number.
-* As usual, Simon and Mary can utilize the lightning network, such that their txns never needs to make it onto the chain, unless there is a dispute.
-
-
--->
 
 
 
