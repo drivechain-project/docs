@@ -109,7 +109,7 @@ We are left with, at most, one (h*, prevBlockRef) pair per sidechain per block. 
 
 To suit our purposes, the mainchain full nodes will need to keep track of the most recent 8000 (h\*, prevBlockRef) pairs.
 
-( This 8,000 figure is a tradeoff between decentralization (costs of running the main:node) and sidechain security -- it requires attackers to merged-mine 8,000 invalid blocks consecutively, in order to cause the sidechain to fail. The mainchain burden is minimal, so this figure might be raised to 12,000 or higher. )
+( This 8,000 figure is a tradeoff between decentralization (costs of running the main:node) and sidechain security -- it requires attackers to merge-mine 8,000 invalid blocks consecutively, in order to cause the sidechain to fail. The mainchain burden is minimal, so this figure might be raised to 12,000 or higher. )
 
 Therefore, D3 would look something like this:
 
