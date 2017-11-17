@@ -27,19 +27,17 @@ A total of three hash-commitments are required, arranged in the following way:
 
                ** Storage of Hash Commitments **   
 
-       Hashrate Escrow Items  ----> to Coinbase (index 1?)
+       Hashrate Escrow Items  ----> (mandatory) inserted in Coinbase at TxOut index 0
           /           \            
          /             \                       
     Sidechain_DB   Withdrawal_DB      
 
-	Blind Merged-Mining Data  ----> to Coinbase (index 2?)
+	Blind Merged-Mining Data  ----> (optional) inserted in Coinbase at some TxOut, (identified by a 4-byte header)
 	
-	
-{{ Perhaps these could be inserted into indexes 1 and 2; more info: https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2017-June/014669.html }}
 
-This first commitment must always be present, but if miners wish to decline to participate, they can easily calculate a valid hash-values (that does not depend on any information they would not already have).
+This first commitment must always be present. This is to prevent free-riding. However, it is not very burdensome -- if miners don't want to participate, they can easily calculate a default valid hash-values. These do not depend on any information they would not already have.
 
-If the second commitment is not present, sidechain nodes will simply assume that no side:block was found in the last 10 minutes.
+If the second commitment is not present, sidechain nodes will simply assume that no side:block was found in the last 10 minutes. There is no possibility of free-riding here, as the commitment does not affect anything that is happening across multiple blocks.
 
 (An earlier version of this document described a way of combining the two ideas into a single hash. I decided that it was confusing people, and have removed it.)
 
