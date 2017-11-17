@@ -1,8 +1,8 @@
     Drivechain Documentation -- Blind Merged Mining
     Paul Sztorc
-    October 24, 2017
+    November 17, 2017
     Document 3 of 3
-    v4.0
+    v4.1
 
 
 Header
@@ -13,7 +13,7 @@ Header
     Title: Blind Merged Mining (Consensus layer)
     Author: Paul Sztorc <truthcoin@gmail.com>
             CryptAxe <cryptaxe@gmail.com>
-	          Chris Stewart <chris@suredbits.com>
+            Chris Stewart <chris@suredbits.com>
     Comments-Summary: No comments yet.
     Comments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-???????
     Status: Draft
@@ -27,9 +27,9 @@ Reminder: Double brackets "{{" and "}}" surround parts that are "unfinished".
 Abstract
 ==========
 
-Blind Merged Mining (BMM) is a way of mining special extension blocks. It produces strong guarantees that the block is valid, for *any* arbitrary set of rules; and yet it does so without requiring miners to actually do any validation on the block whatsoever.
+Blind Merged Mining (BMM) is a way of mining special extension blocks, ie "sidechains". It produces strong guarantees that the block is valid, for *any* arbitrary set of rules; and yet it does so without requiring miners to actually do any validation on the block whatsoever.
 
-BMM actually is a process that spans two or more chains. For an explanation of the "whole picture", please see [this post](http://www.truthcoin.info/blog/blind-merged-mining/). This document, however, focuses only on the required modifications to mainchain Bitcoin.
+BMM actually is a process that spans two or more chains. For an explanation of the "whole picture", please see [this post](http://www.truthcoin.info/blog/blind-merged-mining/). Here we focus on the modifications to mainchain Bitcoin.
 
 To support BMM, the mainchain is asked to accomplish two goals:
 1. Track a set of ordered hashes (the merged-mining).
@@ -43,8 +43,8 @@ Motivation
 
 Regular "Merged-Mining" (MM) allows miners to reuse their hashing work to secure other chains (for example, as in Namecoin). However, traditional MM has two drawbacks:
 
-1. Miners must run a full node of the other chain. (This is because [while miners can effortlessly create the block] miners will not get paid unless the block that they mrg-mined is a valid one. Therefore, miners must assemble a valid block first, then mrg-mine it.)
-2. Miners are paid on the other chain, not on the regular BTC mainchain. For example, miners who mrg-mine Namecoin will earn NMC (and they will need to sell the NMC for BTC, before selling the BTC in order to pay for electricity).
+1. Miners must run a full node of the other chain. (This is because [while miners can effortlessly create the block] miners will not create a valid payment to themselves, unless the block that they MM is a valid one. Therefore, miners must assemble a *valid* block first, then MM it.)
+2. Miners are paid on the other chain, not on the regular BTC mainchain. For example, miners who MM Namecoin will earn NMC (and they will need to sell the NMC for BTC, before selling the BTC in order to pay for electricity).
 
 Blind Merged-Mining (BMM) attempts to address those shortcomings.
 
@@ -52,7 +52,7 @@ Blind Merged-Mining (BMM) attempts to address those shortcomings.
 Specification
 ============
 
-Note: This document uses the notation side:\* and main:\* in front of otherwise-ambiguous words (such as "block", "node", or "chain").
+Note: This document uses the notation side:\* and main:\* in front of otherwise-ambiguous words (such as "block", "node", or "chain"), to distinguish the mainchain version from its sidechain counterpart.
 
 As stated above, we have two goals: [1] create and monitor an alt-chain (defined only by a deterministic list of hashes), and [2] allow miners to "sell" the act of finding a sidechain block (through the use of a new extended serialization transaction type).
 
@@ -64,7 +64,7 @@ Specifically, per side:block per side:chain, we track the following 35 bytes of 
     32-bytes - sideHeaderHash (also known as "h*" / hashCritical, the hash of the sidechain block)
     2-bytes  - prevBlockRef (an index which points to this side:block's parent side:block)
 
-The **ChainIndex** indicates which sidechain this critical data is relevant to. As we may eventually have more than one sidechain, this serves as an identifier similar to the Bitcoin network's magic bytes (0xF9BEB4D9). Drivechains however only need to use 1 byte for the identifier (there is a hard limit of 256 sidechains identified as 0-255). The **sideHeaderHash** is the hash of a side:block which will receive PoW via BMM. It serves a similar function to Bitcoin's "hashMerkleRoot". The **prevBlockRef** forms the set of headers into a blockchain structure by making the headers refer to a previous header. It is most similar to Bitcoin's hashPrevBlock.
+The **ChainIndex** indicates which sidechain this critical data is relevant to. As we may eventually have more than one sidechain, this serves as an identifier similar to the Bitcoin network's magic bytes (0xF9BEB4D9). Drivechains however only need to use 1 byte for the identifier (there is a hard limit of 256 sidechains identified as 0-255). The **sideHeaderHash** is the hash of a side:block which will receive PoW via BMM. It serves a similar function to Bitcoin's "hashMerkleRoot", in that it contains the data for its blockchain. The **prevBlockRef** forms the set of headers into a blockchain structure by making each headers refer to one parent header. It is most similar to Bitcoin's hashPrevBlock.
 
 Where does this data come from, and how does it get around?
 
@@ -72,11 +72,11 @@ Where does this data come from, and how does it get around?
 
 ##### Creation
 
-By the time Blind Merged Mining can take place, the ChainIndex is globally known (it is the "Account Number" in D1 [see previous BIP]). Each sidechain, when activated by soft fork, will take one of the 0-255 available indexes.
+By the time Blind Merged Mining can take place, the ChainIndex is globally known (it is the "Account Number" in D1 [see previous BIP], and "nSidechain" in the code). Each sidechain, when activated by soft fork, will take one of the 0-255 available indexes.
 
 The other two items, sideHeaderHash and prevBlockRef, are created by sidechain nodes. sideHeaderHash is quite straightforward -- side:nodes build side:blocks, and take the hash of these.
 
-The final item, prevBlockRef, is a little more complicated. It is an integer that counts the number of "skips" one must take in the side:chain in order to find the current side:block's parent block. In practice, this value will almost always be zero. It will only be a value other than zero, in cases where invalid sidechain blocks have been mined, or when a side:node intentionally wants to orphan some side:blocks (if a side:node wants to orphan the most-recent N blocks, the value of the current block will be equal to N ; in the block after that it will be back to zero).
+The final item, prevBlockRef, is a little more complicated. It is an integer that counts the number of "skips" one must take in the side:chain in order to find the current side:block's parent block. In practice, this value will usually be zero. It will only be a value other than zero, in cases where invalid sidechain blocks have been mined, or when a side:node intentionally wants to orphan some side:blocks (if a side:node wants to orphan the most-recent N blocks, the value of the current block will be equal to N ; in the block after that it will be back to zero).
 
 ![dots-image](https://github.com/drivechain-project/docs/blob/master/images/bmm-dots-examples.png?raw=true)
 
@@ -92,19 +92,24 @@ Mainchain nodes are going to need this data later, so it must be easy to find. W
 
 Thus, (for n sidechains) we have a coinbase output with:
 
-    1-byte    - OP_RETURN (0x6a)
-    4-bytes   - Identifying flag bytes / message header
-    32-bytes  - h*
-    5~7-bytes - the rest of the Sidechain Mini-Header (prevBlockRef, ChainIndex)
+    1-byte - OP_RETURN (0x6a)
+    1-byte - Push the following (4+(n*35)) bytes (0x??)
+    4-byte - Message header (0x43247053)
+    (n*(32+5))-byte - A sequence of bytes, of the three Mini-Header items (h*, prevBlockRef, ChainIndex).
 
-This can be an individual output for each sidechain, {{ or to save some amount of block space we can combine the information for each sidechain into a single scriptPubKey. Doing this means that we wont be duplicating the OP_RETURN prefix or identifying flag bytes. This would take up 9,479 bytes for 256 sidechains assuming that 5 bytes are used for the Critical Data bytes (non h* parts of the Sidechain Mini-Header). Conveniently below the 10 KB scriptPubKey size limit }}
+( We assume that 5 bytes are used for the Critical Data bytes (non h* parts of the Sidechain Mini-Header). For 256 sidechains, a total of 9,478 bytes [1+1+4+256\*(32+5)] are required, conveniently just below the 10 KB scriptPubKey size limit.)
 
-We are left with, at most, one  (h\*, prevBlockRef) pair per sidechain per block. This data is added directly to D3, a new database.
+This data is parsed by laying it in sequential 37-byte chunks (any remaining data --ie, some final chunk that is less than 37 bytes in length-- has no consensus meaning). 
 
+Each 37-byte chunk is then parsed to obtain the data outlined above (in "Description"). If two 35-byte chunks being with the same "Sidechain number" (ie, if the two chunks have the same first byte), then only the first chunk has consensus meaning.
+
+We are left with, at most, one (h*, prevBlockRef) pair per sidechain per block. This data is added directly to D3, a new database.
 
 #### D3 -- "RecentSidechains_DB"
 
-To suit our purposes, the mainchain full nodes will need to keep track of the most recent 8000 (h\*, prevBlockRef) pairs. (This 8,000 figure is a tradeoff between decentralization (costs of running the main:node) and sidechain security -- it requires attackers to merged-mine 8,000 invalid blocks consecutively, in order to cause the sidechain to fail. The mainchain burden is minimal so this figure might be raised to 12,000 or higher.)
+To suit our purposes, the mainchain full nodes will need to keep track of the most recent 8000 (h\*, prevBlockRef) pairs.
+
+( This 8,000 figure is a tradeoff between decentralization (costs of running the main:node) and sidechain security -- it requires attackers to merged-mine 8,000 invalid blocks consecutively, in order to cause the sidechain to fail. The mainchain burden is minimal, so this figure might be raised to 12,000 or higher. )
 
 Therefore, D3 would look something like this:
 
@@ -138,7 +143,7 @@ To efficiently keep track of the above data, without having to constantly load a
 
 This section introduces a new type of transaction, which allows sidechain block creators to request, and pay for, a critical hash to be included in a specific block by mainchain miners. See [the Blind Merged Mining spec](http://www.truthcoin.info/blog/blind-merged-mining/). This txn allows miners to "sell" the act of mining a sidechain block. By taking advantage of this option, miners earn tx fees for mining sidechains...truly "for free". They do not even need to run sidechain nodes, and the tx-fees they earn are in mainchain BTC. As a result, sidechains affect all miners equally and do not affect the mining ecosystem.
 
-M8 will ultimately come in two versions. The second version will be specialized for use in the Lightning Network and must use the full 32-byte prevBlockHash (ironically, this larger transaction is likely to be off-chain and ultimately cheaper for the Bitcoin network to process). The first version of M8, in contrast, cannot be used inside the Lightning Network but only requires a few bytes (prevBlockRef) to maintain chain order. It is important to have both, because some side:nodes may be unwilling or unable to open a payment channel with each main:miner even though eventually it seems that the lightning version will be preferred.
+M8 will ultimately come in two versions. The second version will be specialized for use in the Lightning Network and must use the full 32-byte prevBlockHash (ironically, this larger transaction is cheaper for the Bitcoin network to process, as it is completely off-chain). The first version of M8, in contrast, cannot be used inside the Lightning Network, but is slightly more space-efficient (using the 2 prevBlockRef bytes to maintain chain order). It is important to make both options availiable to the user, because some side:nodes may be unwilling or unable to open a payment channels with each main:miner. However, in the long run we expect the lightning version to be preferred.
 
 #### Setup
 
@@ -191,9 +196,15 @@ Both forms require that certain Critical Data will be committed to within the co
 
 M8_V1 does not require the Lightning network but does have new requirements for validation.
 
-Critical data structure for non Lightning use:
-    5~7-bytes - (Identifying flag bytes, ChainIndex, prevBlockRef)
+A M8_V1 TxOut is expected to contain:
+
+    1-byte - OP_RETURN (0x6a)
+    1-byte - Push the following 39 bytes (0x27)
+    3-byte - Message header / Identifying flag bytes (0x00bf00)
+    1-byte  - M8 Version (in this case, equal to "0x01")
+    1-byte - ChainIndex (nSidechain)
     32-bytes  - h* side:block hash
+    2-bytes - prevBlockRef
 
 In the first version of M8, we need to introduce the concept of Immediate Expiration (see above). In other words, we need a way for Simon to construct many payments to multiple Marys, such that only one of these is ever included; and only then if Simon's txn is expected to coincide with the finding of Simon's side:block.
 
@@ -222,11 +233,18 @@ Interestingly, these payments (M8) will *always* be directed to miners from non-
 
 M8_V2 requires having a LN-channel open with a miner. This may not always be practical (or even possible), especially today.
 
-Critical data structure for Lightning use:
-    4-bytes - Identifying flag bytes
-    1-byte  - M8 Version (in this case, equal to "2")
-    65-byte - 'Big' Sidechain Mini-Header (1+32+32); This consists of: (ChainIndex, h*, prevSideBlockHash)
+A M8_V1 TxOut is expected to contain:
 
+    1-byte - OP_RETURN (0x6a)
+    1-byte - Push the following 69 bytes (0x45)
+    3-byte - Message header / Identifying flag bytes (0x00bf00)
+    1-byte  - M8 Version (in this case, equal to "0x02")
+    1-byte - ChainIndex (nSidechain)
+    32-bytes  - h* side:block hash
+    32-bytes - prevSideBlockHash
+
+
+{{ Actually, we can just use two different identifiers, for example 0x00bf01 in this case }}.
 
 Notice that, in M8_V1, Simon could reuse the same h\* all he wanted, because only one M8_V1 could be included per main:block per sidechain. However, on the LN no such rule can be enforced, as the goal is to push everything off-chain and include *zero* M8s. So, we will never know what the M8s were or how many had an effect on anything.
 
@@ -253,11 +271,11 @@ And both parties move, from there to "M8_V2" (II):
         Simon's version [signed by Mary]
             6 ; to Simon if TimeLock=over; OR to Mary if SimonSig
             40 ; to Mary
-            7 ; to Mary if critical data requirements met
+            7 ; to Mary if critical data requirements met; OR to Simon if LongTimeLock=over
         Mary's version [signed by Simon]
             40 ; to Mary if TimeLock=over; OR to Simon if MarySig
             6 ; to Simon
-            7 ; to Mary if critical data requirements met
+            7 ; to Mary if critical data requirements met; OR to Simon if LongTimeLock=over
 
 From here, if the h\* side:block in question is BMMed, they can proceed to (III):
 
