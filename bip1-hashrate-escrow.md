@@ -1,8 +1,8 @@
     Drivechain Documentation -- Hashrate Escrows
     Paul Sztorc
-    October 23, 2017
+    November 17, 2017
     Document 2 of 3
-    v4.0
+    v4.1
 
 
 Header
@@ -48,6 +48,13 @@ Specification
 
 Note from Paul: Double brackets "{{" and "}}" surround parts that are "unfinished".
 
+#### Example
+
+Here are two examples we might refer to later.
+
+~example1~
+~example2~
+
 #### Components
 
 Hashrate Escrows are built of two types of component: [1] new databases, and [2] new message-interpretations.
@@ -56,6 +63,8 @@ Hashrate Escrows are built of two types of component: [1] new databases, and [2]
 
 * D1. "Escrow_DB" -- a database of "accounts" and their attributes.
 * D2. "Withdrawal_DB" -- a database of pending withdrawals from these accounts, and their statuses.
+
+Please note that these structures (D1 and D2) will not literally exist anywhere in the blockchain. Instead they are constructed from messages...these messages, in contrast, *will* exist in the blockchain (with the exception of M4). 
 
 ##### 2. New Messages
 
@@ -69,9 +78,10 @@ Hashrate Escrows are built of two types of component: [1] new databases, and [2]
 
 #### On the Resource Requirements of New Databases
 
-The "new" databases are simply reinterpretations of data that are already contained elsewhere in the blockchain. Specifically, M1 M2 and M3 are all located in the block's coinbase txn, and M5 and M6 can be found in any txn. M4 is a special case and does not actually need to be included anywhere, so it is not.
+The "new" databases are simply reinterpretations of data that are already contained elsewhere in the blockchain. Specifically, M1 M2 and M3 are all located in the block's coinbase txn, and M5 and M6 can be found in any txn. M4 is a special case and does not actually need to be included anywhere, so it is not. If you like, you can imagine that the M4s reside in an optional extension block.
 
-In other words, we just rearrange what is already there. Because of this, even though "new databases" are created and stored in memory, the previous bandwidth and storage limits are fully respected (again, see "M4" below).
+In other words, we just rearrange what is already there. Because of this, even though "new databases" are created and stored in memory, the previous bandwidth and storage limits are fully respected (although, see "M4" below).
+
 
 
 
@@ -79,7 +89,9 @@ In other words, we just rearrange what is already there. Because of this, even t
 
 #### D1 -- "Escrow_DB"
 
-The table below enumerates the new database fields, their size in bytes, and their purpose. In general, an escrow designer (for example, a sidechain-designer), is free to select any values that he thinks users will appreciate.
+The table below enumerates the new database fields, their size in bytes, and their purpose. In general, an escrow designer (for example, a sidechain-designer), is free to choose any value for these.
+
+{{ Although, it would help if the sidechains were all conceptually tied together, such that an attack on one was comparable to an attack on all of them. Possibly we should go the other way on this one, and enforce minimum values of 1000, 2000 for Waiting and Voting. }} 
 
 
 Field No. | Label | Bytes | Type | Description / Purpose
@@ -101,12 +113,12 @@ Field No. | Label | Bytes | Type | Description / Purpose
 
 Escrow_DB requires 230 bytes [1+120+32+32+2+2+1+2+2+32+4] for each escrow in the main blockchain. Of these, 72 bytes [32+2+2+32+4] are merely for convenience. Therefore, a sidechain is defined (see "M1") by 158 bytes of information.
 
-#### New Block Validation Rules
+#### Notes on D1
 
-1. A commitment to D1 must always exist.
-2. D1 must always be sorted by "Escrow Number" (field #1), and secondly by "Active" (field #2). As there is only ever one (escrow number, Active) pair, this sorting is always unique.
-3. D1 must always be updated according to M1 and M2 (below).
-4. If a new entry is added to D1 with an "Escrow Number" that is already in use, then this entry will either eventually be removed (because it was not supported with an M2), or it will eventually achieve Active=3000, at which point it overwrites the old entry and destroys it.
+1. D1 will always exist.
+2. D1 will always have a unique sort (first by "Escrow Number" (field #1), and second by "Active" (field #2)). There is only ever one (escrow number, Active) pair. 
+3. D1 is updated according to M1 and M2 (below).
+4. If a new entry is added to D1 with an "Escrow Number" that is already in use, then this entry will either eventually be removed (because it was not supported with an M2), or it will eventually overwrite the old entry (if it *was* supported via M2).
 
 
 #### Notes on D1
@@ -150,7 +162,7 @@ Currently, we use a process which may be suboptimal. It is that we *literally si
 
     1-byte - OP_RETURN (0x6a)
     1-byte - Push the following 162 bytes (0xA2)
-    4-byte - Commitment header (0x????????)
+    4-byte - Commitment header (0x53707243)
     158-byte - the critical bytes mentioned above (fields #1, #3, #4, #6, #7, and #8, to populate a new D1 entry)
 
 
@@ -171,7 +183,7 @@ The escrow will "reuse" the same address over and over. But notice that there is
 
     1-byte - OP_RETURN (0x6a)
     1-byte - Push the following 29 bytes (0x1D)
-    4-byte - Commitment header (0x????????)
+    4-byte - Commitment header (0x53616343)
     25-byte - Commitment hash: RIPMD-160 of Sha256 of a given M1 (above)
 
 #### New Block Validation Rules
@@ -218,7 +230,7 @@ Withdrawal_DB requires 46 bytes [1+32+2+3+2+3+2+1] per entry. Of these, 13 bytes
 
     1-byte - OP_RETURN (0x6a)
     1-byte - Push the following 37 bytes (0x25)
-    4-byte - Commitment header (0x????????)
+    4-byte - Commitment header (0x53505043)
     33-byte - the critical bytes mentioned above (fields #1 and #2, to populate a new D2 entry)
 
 
