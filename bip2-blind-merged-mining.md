@@ -199,12 +199,11 @@ M8_V1 does not require the Lightning network but does have new requirements for 
 A M8_V1 TxOut is expected to contain:
 
     1-byte - OP_RETURN (0x6a)
-    1-byte - Push the following 39 bytes (0x27)
-    3-byte - Message header / Identifying flag bytes (0x00bf00)
-    1-byte  - M8 Version (in this case, equal to "0x01")
-    1-byte - ChainIndex (nSidechain)
+    1-byte - Push the following 36 bytes (0x24)
+    4-byte - Message header (0xD1617368)
     32-bytes  - h* side:block hash
-    2-bytes - prevBlockRef
+    5~7-bytes - BMM request identifying bytes (0x00bf00) + prevBlockRef & ChainIndex (sidechain mini-header)
+    
 
 In the first version of M8, we need to introduce the concept of Immediate Expiration (see above). In other words, we need a way for Simon to construct many payments to multiple Marys, such that only one of these is ever included; and only then if Simon's txn is expected to coincide with the finding of Simon's side:block.
 
@@ -236,15 +235,12 @@ M8_V2 requires having a LN-channel open with a miner. This may not always be pra
 A M8_V1 TxOut is expected to contain:
 
     1-byte - OP_RETURN (0x6a)
-    1-byte - Push the following 69 bytes (0x45)
-    3-byte - Message header / Identifying flag bytes (0x00bf00)
-    1-byte  - M8 Version (in this case, equal to "0x02")
-    1-byte - ChainIndex (nSidechain)
+    1-byte - Push the following 68 bytes (0x44)
+    4-byte - Message header (0xD0520C6E)
     32-bytes  - h* side:block hash
-    32-bytes - prevSideBlockHash
-
-
-{{ Actually, we can just use two different identifiers, for example 0x00bf01 in this case }}.
+    32-bytes  - prevSideBlockHash
+    5~7-bytes - BMM request identifying bytes (0x00bf00) + prevBlockRef & ChainIndex (sidechain mini-header)
+    
 
 Notice that, in M8_V1, Simon could reuse the same h\* all he wanted, because only one M8_V1 could be included per main:block per sidechain. However, on the LN no such rule can be enforced, as the goal is to push everything off-chain and include *zero* M8s. So, we will never know what the M8s were or how many had an effect on anything.
 
