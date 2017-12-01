@@ -1,4 +1,4 @@
-    Drivechain Documentation -- Blind Merged Mining
+    Drivechain Documentation -- Blind Merged Mining BIP
     Paul Sztorc
     November 17, 2017
     Document 3 of 3
@@ -20,8 +20,6 @@ Header
     Type: Standards Track
     Created: 2017-10-24
     License: BSD-2-Clause
-
-Reminder: Double brackets "{{" and "}}" surround parts that are "unfinished".
 
 
 Abstract
