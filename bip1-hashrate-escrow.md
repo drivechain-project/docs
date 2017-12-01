@@ -1,4 +1,4 @@
-    Drivechain Documentation -- Hashrate Escrows
+    Drivechain Documentation -- Hashrate Escrows BIP
     Paul Sztorc
     November 17, 2017
     Document 2 of 3
