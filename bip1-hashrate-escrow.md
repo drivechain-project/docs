@@ -19,6 +19,7 @@ Header
     Type: Standards Track
     Created: 2017-08-14
     License: BSD-2-Clause
+    Post-History: https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2017-May/014364.html
 
 
 Abstract
@@ -27,6 +28,8 @@ Abstract
 A "Hashrate Escrow" is a clearer term for the concept of "locked to an SPV Proof", which is itself a restatement of the phrase "within a sidechain" as described in [a famous Oct 2014 paper](https://blockstream.com/sidechains.pdf) written partially by some Blockstream co-founders.
 
 The concept resembles a 2-of-3 multisig escrow, where the 3rd party (who will arbitrate any disputes) is the set of Bitcoin Miners. However, miners do not sign the transaction with a private key. Instead, they sign it by directing hashpower over it for a period of time.
+
+This project has [a website](http://www.drivechain.info/) which includes [a FAQ](http://www.drivechain.info/faq/index.html).
 
 
 Motivation
