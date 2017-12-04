@@ -41,7 +41,7 @@ Sidechains have potential benefits, including:
 
 1. Protect Bitcoin from competition from altcoins and spinoffs. Safely allow competing implementations (of *sidechains*).
 2. Protect Bitcoin from hard fork campaigns. (Such campaigns represent an existential threat to Bitcoin, as well as an avenue for developer corruption.)
-3. Help with review, by making it must easier for reviewers to ignore bad ideas.
+3. Help with review, by making it much easier for reviewers to ignore bad ideas.
 4. Provide an avenue for good-but-confusing ideas to prove their value safely.
 
 
