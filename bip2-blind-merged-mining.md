@@ -92,7 +92,7 @@ Thus, (for n sidechains) we have a coinbase output with:
 
     1-byte - OP_RETURN (0x6a)
     1-byte - Push the following (4+(n*35)) bytes (0x??)
-    4-byte - Message header (0x43247053)
+    4-byte - Message header (0xD3407053)
     (n*(32+5))-byte - A sequence of bytes, of the three Mini-Header items (h*, prevBlockRef, ChainIndex).
 
 ( We assume that 5 bytes are used for the Critical Data bytes (non h* parts of the Sidechain Mini-Header). For 256 sidechains, a total of 9,478 bytes [1+1+4+256\*(32+5)] are required, conveniently just below the 10 KB scriptPubKey size limit.)
