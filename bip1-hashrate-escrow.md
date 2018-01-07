@@ -233,7 +233,7 @@ Withdrawal_DB requires 46 bytes [1+32+2+3+2+3+2+1] per entry. Of these, 13 bytes
 
     1-byte - OP_RETURN (0x6a)
     1-byte - Push the following 37 bytes (0x25)
-    4-byte - Commitment header (0x53505043)
+    4-byte - Commitment header (0xD45AA943)
     33-byte - the critical bytes mentioned above (fields #1 and #2, to populate a new D2 entry)
 
 
