@@ -291,11 +291,14 @@ If the h\* side:block is not found, then (II) and (III) are basically equivalent
 Deployment
 ===========
 
-This BIP will be deployed by "version bits" BIP9 with the name "blindmm" and using bit ???.
+This BIP will be deployed by "version bits" BIP9 with the name "blindmm" and using bit 4.
 
-For Bitcoin mainnet, the BIP9 starttime will be midnight ??????????? UTC (Epoch timestamp ???) and BIP9 timeout will be ??????????? UTC (Epoch timestamp ???).
-
-For Bitcoin testnet, the BIP9 starttime will be midnight ??????????? UTC (Epoch timestamp ???) and BIP9 timeout will be ??????????? UTC (Epoch timestamp ???).
+```
+// Deployment of Drivechains (BIPX, BIPY)
+consensus.vDeployments[Consensus::DEPLOYMENT_DRIVECHAINS].bit = 4;
+consensus.vDeployments[Consensus::DEPLOYMENT_DRIVECHAINS].nStartTime = 1515974401; // January 15th, 2018.
+consensus.vDeployments[Consensus::DEPLOYMENT_DRIVECHAINS].nTimeout = 1547510401; // January 15th, 2019.
+```
 
 Reference Implementation
 ==========================
