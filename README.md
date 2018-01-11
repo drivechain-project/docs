@@ -6,7 +6,6 @@ Welcome!
 * Visit [Drivechain.info](http://www.drivechain.info/), the project site.
 * Follow [Paul Sztorc](https://twitter.com/Truthcoin) on Twitter.
 * Join the IRC channel -- #drivechain-dev on freenode.
-* Join our MEETING, Wednesdays at 1 PM, East Coast Time (NYC). [ IRC, and appear.in/drivechain ].
 
 
 Read some [Developer Notes](https://github.com/drivechain-project/docs/blob/master/DeveloperNotes.md) before continuing!
