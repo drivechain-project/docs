@@ -1,8 +1,8 @@
     Drivechain Documentation -- Hashrate Escrows BIP
     Paul Sztorc
-    November 17, 2017
+    January 18, 2018
     Document 2 of 3
-    v4.1
+    v5.0
 
 
 Header
@@ -27,7 +27,7 @@ Abstract
 
 A "Hashrate Escrow" is a clearer term for the concept of "locked to an SPV Proof", which is itself a restatement of the phrase "within a sidechain" as described in [a famous Oct 2014 paper](https://blockstream.com/sidechains.pdf) written partially by some Blockstream co-founders.
 
-The concept resembles a 2-of-3 multisig escrow, where the 3rd party (who will arbitrate any disputes) is the set of Bitcoin Miners. However, miners do not sign the transaction with a private key. Instead, they sign it by directing hashpower over it for a period of time.
+A Hashrate Escrow resembles a 2-of-3 multisig escrow, where the 3rd party (who will arbitrate any disputes) is a decentralized group of people: the dynamic-membership set of Bitcoin Miners. However, the 3rd party does not sign escrow-withdrawal transactions with a private key. Instead, these are "signed" by directing hashpower over them for a period of time.
 
 This project has [a website](http://www.drivechain.info/) which includes [a FAQ](http://www.drivechain.info/faq/index.html).
 
@@ -37,7 +37,7 @@ Motivation
 
 In practice these escrows are likely to be "asymmetric sidechains" of Bitcoin (such as [Rootstock](http://www.rsk.co/)) or "virtual chains" within Bitcoin (such as [proposed by Blockstack](https://github.com/blockstack/virtualchain) in mid-2016).
 
-Sidechains have potential benefits, including:
+Sidechains have many potential benefits, including:
 
 1. Protect Bitcoin from competition from altcoins and spinoffs. Safely allow competing implementations (of *sidechains*).
 2. Protect Bitcoin from hard fork campaigns. (Such campaigns represent an existential threat to Bitcoin, as well as an avenue for developer corruption.)
@@ -49,14 +49,6 @@ Sidechains have potential benefits, including:
 Specification
 ==============
 
-Note from Paul: Double brackets "{{" and "}}" surround parts that are "unfinished".
-
-#### Example
-
-Here are two examples we might refer to later.
-
-~example1~
-~example2~
 
 #### Components
 
@@ -81,9 +73,9 @@ Please note that these structures (D1 and D2) will not literally exist anywhere 
 
 #### On the Resource Requirements of New Databases
 
-The "new" databases are simply reinterpretations of data that are already contained elsewhere in the blockchain. Specifically, M1 M2 and M3 are all located in the block's coinbase txn, and M5 and M6 can be found in any txn. M4 is a special case and does not actually need to be included anywhere, so it is not. If you like, you can imagine that the M4s reside in an optional extension block.
+The "new" databases are simply reinterpretations of data that are already contained elsewhere in the blockchain. Specifically, M1 M2 and M3 are all located in the block's coinbase txn, and M5 and M6 might be found in any regular txn. M4 is a special case and does not actually need to be included anywhere, so it is not. If you like, you can imagine that the M4s reside in an optional extension block.
 
-In other words, we just rearrange what is already there. Because of this, even though "new databases" are created and stored in memory, the previous bandwidth and storage limits are fully respected (although, see "M4" below).
+In other words, we just rearrange what is already there. Because of this, even though "new databases" are created and stored in memory, the existing bandwidth and storage limits are respected (although, see "M4" below).
 
 
 
@@ -94,8 +86,7 @@ In other words, we just rearrange what is already there. Because of this, even t
 
 The table below enumerates the new database fields, their size in bytes, and their purpose. In general, an escrow designer (for example, a sidechain-designer), is free to choose any value for these.
 
-{{ Although, it would help if the sidechains were all conceptually tied together, such that an attack on one was comparable to an attack on all of them. Possibly we should go the other way on this one, and enforce minimum values of 1000, 2000 for Waiting and Voting. }} 
-
+Note: Fields 6 through 9 have been intentionally removed. Previously, this section allowed miners to set and commit to voting/waiting periods. However, I have since standardized the periods: withdrawals expire after 6 months (26298 blocks), and they succeed if they ever achieve an ACK score of 13140 or higher. I have removed the waiting period, because anyone who adopts a policy of ignoring all withdrawals with fewer than 400 ACKs will automatically gain all of the benefits of the waiting period. The justification for this change is that it strongly implies that an attack on any one sidechain is an attack on all of them (in a sense, this change makes the "victimhood" of each sidechain "fungible").
 
 Field No. | Label | Bytes | Type | Description / Purpose
 ----------|-------|------|------|--------
@@ -114,7 +105,7 @@ Field No. | Label | Bytes | Type | Description / Purpose
 
 \* Denotes a "convenience field", the entry for this field is derived from other fields, or from the blockchain-state itself. The escrow-creator does not need to provide these values in M1 (or anywhere).
 
-Escrow_DB requires 230 bytes [1+120+32+32+2+2+1+2+2+32+4] for each escrow in the main blockchain. Of these, 72 bytes [32+2+2+32+4] are merely for convenience. Therefore, a sidechain is defined (see "M1") by 158 bytes of information.
+Escrow_DB requires 223 bytes [1+120+32+32+2+32+4] for each escrow in the main blockchain. Of these, 70 bytes [2+32+32+4] are merely for convenience. Therefore, a sidechain is defined (see "M1") by 153 bytes of information.
 
 #### Notes on D1
 
@@ -128,7 +119,7 @@ Escrow_DB requires 230 bytes [1+120+32+32+2+2+1+2+2+32+4] for each escrow in the
 
 ##### Obligations Placed on Miners
 
-Miners have always upgraded their software according to criteria that are known only to them.
+Miners have always upgraded their software according to criteria that are known only to them (in other words, "whenever they want").
 
 However, this soft fork imposes two new criteria upon them. First: miners should only upgrade their software, if any modification to the portfolio of sidechains [that are added/removed in the upgrade] can be expected to increase miner wealth. Trivially, this implies that miners should make sure that the upgrade doesn't overwrite (and destroy) an existing sidechain that they like! But, more seriously, it implies that miners should take an interest in what the sidechain is doing to the mainchain and other sidechains (see below).
 
@@ -151,7 +142,7 @@ Call it a "sidechain non-aggression principle", if you want.
 To the best of my knowledge, everyone who *has* reviewed this information as found the arguments to be acceptable. It has, also, changed a few minds (from "unacceptable" to "acceptable").
 
 
-##### "Signing" BTC Txns
+##### ISSUE: "Signing" BTC Txns
 
 Currently, we use a process which may be suboptimal. It is that we *literally sign* a txn with a globally and publicly known private key. But this is for convenience purposes -- the signature that is produced is not doing anything, and is therefore wasteful. Instead we may use OP_TRUE, but this might interfere with how we detect the sidechain's balance. I'm not sure what the best way is. Someone needs to investigate how to do this -- removing OP_CheckSig, etc. This is a TODO for sure, and an opportunity for someone to help.
 
@@ -164,9 +155,9 @@ Currently, we use a process which may be suboptimal. It is that we *literally si
 #### M1 -- "Propose New Sidechain"
 
     1-byte - OP_RETURN (0x6a)
-    1-byte - Push the following 162 bytes (0xA2)
+    1-byte - Push the following 157 bytes (0x9d)
     4-byte - Commitment header (0x53707243)
-    158-byte - the critical bytes mentioned above (fields #1, #3, #4, #6, #7, and #8, to populate a new D1 entry)
+    153-byte - the critical bytes mentioned above (fields #1, #3, and #4, to populate a new D1 entry)
 
 
 #### New Block Validation Rules
@@ -179,7 +170,7 @@ Currently, we use a process which may be suboptimal. It is that we *literally si
 
 #### Notes on M1
 
-The escrow will "reuse" the same address over and over. But notice that there is no privacy loss due to address reuse, because the address in question does not "belong" to any specific individual. Furthermore, the transactions could already be linked by just watching the account for deposits ...this, in fact, is exactly what a sidechain must do in order to make main-to-side transfers.
+The escrow will "reuse" the same address over and over. But notice that there is no privacy loss due to address reuse, because the address in question does not "belong" to any specific individual. Furthermore, the transactions in question could already be linked by just watching the Hashrate Escrow for deposits ...this, in fact, is exactly what a sidechain must do in order to make main-to-side transfers.
 
 
 #### M2 -- "ACK Sidechain Proposal"
@@ -193,7 +184,7 @@ The escrow will "reuse" the same address over and over. But notice that there is
 
 1. An entry will be removed from D1, unless that block contains an M2 supporting it (this will increment field #2), or the entry has accumulated 4032 M2s. Therefore, each entry needs to have 4032 *consecutive* M2s supporting it, else it will be removed from D1 and must start over. This requires all miners to agree to "soft fork" the sidechain into existence. This makes it easier to curate the list of active sidechains, and prevents destructive interference (see above) among contradictory sidechains.
 2. Once the entry has 4032 M2s, then a miner must make a 0 btc payment to the Critical Address, thus activating the chain. This payment becomes the first "critical (TxID, index) pair" (or "CTIP").
-3. It is possible to "overwrite" a D1 slot -- this destroys the sidechain that is there, and replaces it with a new one. In this case, the quantity of M2s needed is not 4032, but it is instead the length of two 'voting cycles', which is defined as the "Waiting Period" plus the "Voting Period". This does not change the security assumptions, because we already assume that users have access to "magically true" bandwidth at a rate of 1 bit per voting cycle. (This is why the voting cycles should be large, 1 month Waiting, 2+ months Voting).
+3. It is possible to "overwrite" a D1 slot -- this destroys the sidechain that is there, and replaces it with a new one. This is defined as requiring 6 months (26298 blocks) of M2s, instead of 4 weeks (4032). This possibility does not change the security assumptions, because we already assume that users have access to "magically true" bandwidth at a rate of 1 bit per ACK-cycle. (This is why the voting cycles should be large, 1 month Waiting, 2+ months Voting).
 
 
 
@@ -245,15 +236,39 @@ Withdrawal_DB requires 46 bytes [1+32+2+3+2+3+2+1] per entry. Of these, 13 bytes
 
 #### M4 -- "ACK Withdrawal"
 
+#### Very Little Info, Probably Calculable in Advance
+
 M4 is exceptional (in comparison to the other M's) in a few ways. First, its content is not stored anywhere, only the *hash* of its *effect* is stored (in a leaf of a merkle tree who's root is inserted into a mainchain coinbase). M4 alters the contents of D2 -- the *contents* of D2 are consensus critical, but M4 (the process by which nodes reach a new valid D2) can be anything.
 
 In fact, M4 can also be *nothing*. In other words, it may be optional. This is precisely because, from one block to the next, we have constrained D2 such that it is only allowed to change in a few ways. Therefore, the exhaustive set of "candidate D2s" can be precomputed by full nodes in advance.
+
+#### A Recent Change: Two Withdrawals at Once
+
+The following sections assume a maximume of one sucessful withdrawal per sidechain at a time. In other words, as WT^s are proposed, only one can make progress toward the finish line. However, I have changed this to a maximum of two withdrawals at a time.
+
+![dots-image](https://github.com/drivechain-project/docs/blob/master/images/group-wt-infographic.png?raw=true)
+
+The change doubles the transfer convenience, because it now takes between 3-4.5 months to complete a withdrawal, as opposed to 3-6 months. If there is only one withdrawal at a time, if a user just misses a proposed WT^, then they need to wait 3 months for that WT^ to hopefully succeed, and then join the new WT^, and wait 3 months for this new WT^ to hopefully succeed. With two, the sidechain can use an accumulation period of 1.5 months, such that no one will ever need to wait more than 4.5 months.
+
+![dots-image](https://github.com/drivechain-project/docs/blob/master/images/two-groups.png?raw=true)
+
+
+The cost of this is that users are responsible for tracking twice as many withdrawal candidates, and for sounding the alarm if any withdrawal candidate is invalid. This cost is quite severe, as drivechain's security relies on this task being very easy, so as to make for a very convincing threat.
+
+Why two groups, and not some other number? Firstly, the benefits diminish rapidly (with worst-case withdrawal time obeying f(n)=3+(3/n)). With 3 groups the user's waiting time ranges from 3-4 months, and with 4 groups it ranges from 3-3.75. These are gains of 0.5 months and 0.25 months, respectively, comparied to the n=2 gain of 1.5 months. Moreover, the costs are severe, hard-to-estimate, constant in n and eventually accelerating in n. So I believe 2 is the optimal value.
+
+Be aware that I have kept the following sections as-is, because it is much easier to first explain and understand the concepts on a per-group basis (ie, with one withdrawal allowed at a time). So I am leaving the following sections as they are. They assume 100 sidechains, 1 group per sidechain, and 1,000 attempts per sidechain. The conclusions of those assumptions apply equally to a world with 50 sidechains, 2 groups per sidechain, and 1,000 attempts per group. It does not strongly affect the conclusions, because the attacker still pays in full for each attempt. But more groups has the same effect as adding more sidechains.
+
+
+#### How Hard is it to Guess M4?
 
 If there are n Escrows and m Withdrawals-per-escrow<sup>1</sup>, then there are (m+2)^n total candidates for the next D2. This is because, [per block per escrow], one of three things can happen: (1) one of the m withdrawal-candidates can be "ACK"ed (or "upvoted" or "promoted"), which automatically downvotes the others; or (2) all withdrawal-candidates can be downvoted, or finally (3) the miners can abstain from voting on the escrow's withdrawals altogether, leaving the tallies the same.
 
 First, for nodes which validate all sidechains (assuming these escrows are sidechains), this simplifies to 2^n -- these nodes only have to choose between the single honest choice (on one hand) or an abstention (on the other). Second, even for nodes that don't validate any sidechains, the number of candidates might be reduced from m^n to 3^n, by making a simplifying assumption: whichever withdrawal was most recently added/upvoted, is likely to be the one which is upvoted next.
 
 Of course, that is still O(k^n) for n sidechains, which isn't great<sup>2</sup>. If the "D2 update" cannot be guessed, it must be transmitted in some way.
+
+#### Giving Up and Getting M4 the Old Fashioned Way
 
 Two examples for transmitting it are below:
 
@@ -267,13 +282,13 @@ Two examples for transmitting it are below:
 
     4-byte - Message identifier (0x????????)
     1-byte - Version of this message
-    1-byte - Length (in bytes) of this message; total number of withdrawal attempts; y = ceiling( sum_i(m_i +2)/8 ).
-    Y-byte - stream of bits (not bytes), with a 1 indicating the position of the chosen action [abstain, downvote all, upvote1, upvote2, ...]
+    1-byte - Length (in bytes) of this message; total number of withdrawal attempts; y = ceiling( sum_i(m_i +2)/8 ). Nodes should already know what length to expect, because they know the sequence of M3s and therefore the vector of WT^s.
+    Y-byte - stream of bits (not bytes), with a 1 indicating the position of the chosen action [downvote all, abstain, upvote1, upvote2, ...]
 
 
 If the message is very very large, then nodes may not want to broadcast it. This opens up an "exhaustion attack"<sup>2</sup>, in which many miners create bad WT^s, vote on these randomly, and then refuse to broadcast their votes. Fortunately, even for a worst-case scenario of 200 sidechains and 1,000 withdrawal-attempts per sidechain, honest nodes can communicate a long form M4 with each other by using just 25,056 bytes per block [4+1+1+(200\*(1000+1+1)/8)].
 
-Today's pre-drivechain miners can already carry out a similar attack, by creating and including txns and then not broadcasting that part of the block to anyone. This is often characterized as a  ["block publication incentive:](https://petertodd.org/2016/block-publication-incentives-for-miners), because in that case the possibility of exhaustively computing all possible transactions is one that is so difficult as to be completely out of the question.
+Today's pre-drivechain miners can already carry out a similar attack, by creating and including txns and then not broadcasting that part of the block to anyone. This is often characterized as a  ["block publication incentive"](https://petertodd.org/2016/block-publication-incentives-for-miners), because in that case the prospect of exhaustively computing all possible transactions (to uncover the missing ones) is completely out of the question.
 
 However, message M4 is different from a withheld-txn, because M4 operates outside of the block's mandated information-processing limits (ie, outside the infamous 1 MB nonwitness blocksize limit). So we should examine the conditions under which M4 grows and shrinks, to ensure that we are not smuggling in a tremendous burden on full nodes.
 
@@ -292,7 +307,6 @@ From one block to the next, D2 can only be edited in a few strict ways:
 
 * Entries can only be added/removed from D2 if they meet the criteria above (in M3, and implicitly M1 and M2).
 * The ACK-counter of any individual entry can only change by (-1,0,+1) relative to its previous entry.
-* If "Age" < "Waiting Period", then the ACK counter must remain at zero.
 * Within a sidechain group, upvoting one withdrawal (ACK=ACK+1) requires you to downvote all other withdrawals in that group. However, the minimum ACK value is zero (and, therefore, downvotes cannot reduce it below zero).
 
 ##### Footnotes for M4
@@ -317,7 +331,7 @@ Such txns are forced (by consensus) to obey two additional criteria:
 
 These criteria are enforced here https://github.com/drivechain-project/bitcoin/blob/mainchainBMM/src/validation.cpp#L440-L473 by checking that a deposit is paying back to the sidechain more than it is taking out, and completely rejecting any withdrawal from the mempool. And here https://github.com/drivechain-project/bitcoin/blob/mainchainBMM/src/validation.cpp#L1747-L1757 we allow for a withdrawal only once it has attained sufficient work score (ACKs).
 
-The purpose of this is to have all of the escrow's money (ie all of the sidechain's money) in one TxID, so that depositors immediately undo any UTXO bloat they may cause. This simplifies the withdrawal process, as there is no need to worry about cleaning up "dust deposits" (...and such cleaning can often result in headaches, for example where a withdrawal-txn is larger than 1MB in size, or which may only withdraw an arbitrarily limited amount of BTC). Notice that, unless we assume that an account will last forever, all utxos which are deposited must eventually be withdrawn by someone. Therefore, the relevant design criterion is not "efficiency" (total cost) but rather "who should pay" (allocation of costs).
+The purpose of this is to have all of the escrow's money (ie all of the sidechain's money) in one TxID, so that depositors immediately undo any UTXO bloat they may cause. This simplifies the withdrawal process, as there is no need to worry about cleaning up "dust deposits" (...and such cleaning can often result in headaches, for example where a withdrawal-txn is larger than 1MB in size, or else may only withdraw an arbitrarily limited amount of BTC). Notice that, unless we assume that an account will last forever, all utxos which are deposited must eventually be withdrawn by someone. Therefore, the relevant design criterion is not "efficiency" (total network cost) but rather "who should pay" (allocation of costs).
 
 #### M5. "Make a Deposit" -- a transfer of BTC from-main-to-side
 
@@ -325,7 +339,7 @@ As far as mainchain consensus is concerned, there are no additional requirements
 
 However, in practice there *are* additional mainchain requirements...specified by the escrow account, (ie specified by the "sidechain" or "virtual chain"). These requirements are not part of mainchain consensus and are allowed to be anything. In other words, the sidechain is free to invent any way to credit depositor's money -- M5 is fully customizable.
 
-One method, is for depositors to append a zero-value OP Return to a Deposit txn, so that the sidechain knows where to credit funds on the sidechain network. Mainchain users must upgrade their wallet software, of course, (on an individual basis) in order to become aware of and take advantage of new deposit-methods.
+One method, is for mainchain depositors to append a zero-value OP Return to a Deposit txn, so that the sidechain knows how to credit funds. Mainchain users must upgrade their wallet software, of course, (on an individual basis) in order to become aware of and take advantage of new deposit-methods.
 
 ##### Inconvenient Race Condition
 
@@ -340,12 +354,14 @@ We come, finally, to the critical matter: where users can take their money *out*
 
 From there, we merely introduce two final concepts:
 
-1. In each block, an entry in D2 is considered an "approved candidate" if the "ACKs" value is above the "Threshold" value.
-2. A "blinded TxID" is way of hashing the txn, in which we first overwrite some parts of the txn with zeros. Specifically, the first 36 bytes of TxIn0 (TxOutHash + TxOutIndex), as well as the first 8 bytes of TxOut0.
+1. In each block, an entry in D2 is considered an "approved candidate" if the "ACKs" value is above 13140.
+2. A "blinded TxID" is way of hashing the txn, in which we first overwrite some parts of the txn with zeros. Specifically, the first 36 bytes of "TxIn0" (the first input, including TxOutHash and TxOutIndex), as well as the first 8 bytes of "TxOut0" (the first output).
 
-Blinding is necessary because of our restriction of the account to a single UTXO-member. Because of this, during the ACKing process two features of that withdrawal-txn may change: the CTIP (which changes with each deposit), and the total quantity of BTC stored in the account (which arbitrarily increases with each new deposit). In other words, a withdrawal-attempt is created via M3, but this takes place many blocks before the withdrawal is actually included via M6. During this time, a single new deposit to the account would change its CTIP and its value. So, we need a way of forcing the TxID to be stable while we ACK it.
+Blinding is necessary because we allow each sidechain only one UTXO at a time.
 
-When M6 is ultimately included in a block, we will force it to spent the entire sidechain balance (by forcing sum(input_values) to equal sum(output_values)). It will create a new output which is itself a deposit to the sidechain it withdrew from (which nodes can check using D1's CTIP field). This requirement eliminates the possibility of including a transaction fee, as traditionally calculated. To compensate for *that*, txn fees should be encoded explicitly, as a withdrawal to OP_TRUE (which the block's miner immediately claims).
+of our restriction of the account to a single UTXO-member. Because of this, during the ACKing process the withdrawal-txn (which is currently being ACKed) may change in two ways: the CTIP (which changes with each deposit), and the total quantity of BTC stored in the account (which arbitrarily increases with each new deposit). In other words, a withdrawal-attempt is created via M3, but this takes place many blocks before the withdrawal is actually included via M6. During this time, a single new deposit to the account would change its CTIP and its value. So, what do we ACK? Well, we ACK a "blinded" version of the withdrawal. This blinded version is stable because the dynamic parts are always overwritten with zeros.
+
+While we ACK a blinded WT^, what is actually included in the blockchain ("M6") is an unblinded WT^. Since each blinded WT^ could correspond to many different unblinded WT^s, we need to impose further restrictions on those unblinded WT^s that are finally included. First, we will force the final unblinded WT^ to spend the entire sidechain balance (by forcing sum(input_values) to equal sum(output_values)). To avoid withdrawing the entire sidechain balance with every withdrawal, we will, secondly, force the unblinded WT^ to create a new output which is itself a deposit to the sidechain it withdrew from (which nodes can check using D1's CTIP field). Unfortunately, these requirements eliminate the possibility of including a transaction fee, as traditionally calculated. So, finally, to compensate for *that*, txn fees are encoded explicitly as a withdrawal to OP_TRUE (which the main:block's miner can immediately claim).
 
 With all of this in place, the only requirements for inclusion in a block are these:
 
@@ -364,7 +380,7 @@ Backward compatibility
 
 As a soft fork, older software will continue to operate without modification. Non-upgraded nodes will see a number of phenomena that they don't understand -- coinbase txns with non-txn data, value accumulating in anyone-can-spend UTXOs for months at a time, and then random amounts leaving the UTXO in single, infrequent bursts. However, this phenomena doesn't affect them or the validity of the money that they receive.
 
-( As a nice bonus, note that the sidechains themselves inherit a resistance to hard forks. Soft forks are the only way to guarantee that the WT^s reported by different clients will continue to match going forward. )
+( As a nice bonus, note that the sidechains themselves inherit a resistance to hard forks. The only way to guarantee that the WT^s reported by different clients will continue to match identically, is to upgrade sidechains via soft forks of themselves. )
 
 
 Deployment
