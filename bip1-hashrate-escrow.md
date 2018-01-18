@@ -420,3 +420,14 @@ Copyright
 ==========
 
 This BIP is licensed under the BSD 2-clause license.
+
+
+
+Open Issues in the Code That Are Worth Special Mention
+=================================================
+
+1. The new concept of "Groups". In particular, double-check that blinding doesn't break anything. (It shouldn't but one never knows for sure.)
+2. Long form M4, and any prep work that might help, for when miners just do their own thing and optimize it all.
+3. The pointless OP CheckSIG -- A solution is needed. A good solution will [a] still be easy for users to track the sidechain's balance; and [b] not produce a pointless signature. See #4.
+4. Other "pointless" fields, such as the sidechain private key and public key. Now that the focus has shifted so much to the CTIP, I'm not sure the extent to which it matters.
+5. Depositing to multiple sidechains at once.
