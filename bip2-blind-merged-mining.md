@@ -76,7 +76,7 @@ The other two items, sideHeaderHash and prevBlockRef, are created by sidechain n
 
 The final item, prevBlockRef, is a little more complicated. It is an integer that counts the number of "skips" one must take in the side:chain in order to find the current side:block's parent block. In practice, this value will usually be zero. It will only be a value other than zero, in cases where invalid sidechain blocks have been mined, or when a side:node intentionally wants to orphan some side:blocks (if a side:node wants to orphan the most-recent N blocks, the value of the current block will be equal to N ; in the block after that it will be back to zero).
 
-![dots-image](https://github.com/drivechain-project/docs/blob/master/images/bmm-dots-examples.png?raw=true)
+![dots-image](/images/bmm-dots-examples.png?raw=true)
 
 Since the hashes themselves are already ordered by the mainchain, tracing the blockchain's path by index (prevBlockRef) will be the same as tracing it by identifying a list of hashes. In other words, the ordering given via each side:block's "prevBlockRef" will be isomorphic to an ordering given by each side:block's "prevSideHeaderHash" ... if "prevSideHeaderHash is defined to be the sidechain's equivalent of the mainchain's "prevBlockHash". It will be possible to freely convert from one to the other. See M8 to learn more about how these hashes are requested by sidechain block creators to be included in the mainchain.
 
@@ -218,7 +218,7 @@ To impose new requirements at the transaction level, we borrow the dummy vin & "
 
 
 
-![extra-data-image](https://github.com/drivechain-project/docs/blob/master/images/witness-vs-critical.png?raw=true)
+![extra-data-image](/images/witness-vs-critical.png?raw=true)
 
 This txn structure conserves main:blockspace, because it is the easiest way to refer to a previous sidechain block in 4 bytes, (prevBlockRef + FoK_nLockTime). Instead, we would need to use at least 32 bytes (prevSideBlockHash).
 
