@@ -95,10 +95,6 @@ Field No. | Label | Bytes | Type | Description / Purpose
 3 | Escrow Name/Description | 120 | string | A human-readable name and description of the sidechain. More than enough space to hold a 32 byte hash. Helps prevent destructive interference among sidechains (see below).
 4 | Critical Private Key | 32 | hex | This is the Double-SHA256 of the binary release of the reference software. It ties the sidechain to a specific software release, and doubles as a way of signing withdrawals (see below).
 5 | Critical Address\* | 32 | string | This is derived by taking f(x) = ImportPrivateKey(HexToBase58Check(x)) of field #3. It is intentionally in the human-readable format {{although it could be 25 bytes of binary}}.
-6 | Waiting Period | 2 | uInt | A timing parameter, expressed in the units "number of blocks". The max value is 65535, or just over 15 months. This prevents "surprises" in withdrawing, which is helpful because surprises can only benefit attackers.
-7 | Voting Period | 2 | uInt | A timing parameter, expressed in the units "number of blocks". If this is higher, withdrawals will be more secure, but slower.
-8 | Threshold Given | 1 | uInt | This is interpreted as a percentage, but "per 256" (instead of per 100), and will be used later to regulate withdrawals. A higher value indicates that more hashrate is needed to withdraw from the escrow. As a result, higher values are more secure but may also be "too secure" (with even valid withdrawals often failing).
-9 | Threshold Calc\* | 2 | uInt | This is derived by taking f(x,y) = ceiling(x*[y/256]) of fields (#6, #7). It could be interpreted as: total number of "AckBlocks" needed, out of total number of "Voting Period" blocks. This interpretation is similar to Bit-signaling.
 10 | "CTIP" -- Part 1 "TxID"\* | 32 | hex | The CTIP, or "Critical (TxID, Index) Pair" is a variable for keeping track of where the escrow's money is (ie, which member of the UTXO set).
 11 | "CTIP" -- Part 2 "Index"\* | 4 | hex | Of the CTIP, this is second element of the pair: the Index. See #10 above.
 
