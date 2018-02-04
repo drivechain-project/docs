@@ -242,7 +242,7 @@ In fact, M4 can also be *nothing*. In other words, it may be optional. This is p
 
 The following sections assume a maximum of one sucessful withdrawal per sidechain at a time. In other words, as WT^s are proposed, only one can make progress toward the finish line. As a result, a given side-to-main transfer will always take between 3 and 6 months. If there were more simulataneous withdrawals, the worst-case transfer duration would improve.
 
-![dots-image](https://github.com/drivechain-project/docs/blob/master/images/two-groups.png?raw=true)
+![dots-image](/images/two-groups.png?raw=true)
 
 The worst-case withdrawal time obeys f(n)=3+(3/n) months, where n is the number of simultaneous withdrawals.
 
