@@ -244,21 +244,17 @@ In fact, M4 can also be *nothing*. In other words, it may be optional. This is p
 
 #### A Recent Change: Two Withdrawals at Once
 
-The following sections assume a maximume of one sucessful withdrawal per sidechain at a time. In other words, as WT^s are proposed, only one can make progress toward the finish line. However, I have changed this to a maximum of two withdrawals at a time.
-
-![dots-image](https://github.com/drivechain-project/docs/blob/master/images/group-wt-infographic.png?raw=true)
-
-The change doubles the transfer convenience, because it now takes between 3-4.5 months to complete a withdrawal, as opposed to 3-6 months. If there is only one withdrawal at a time, if a user just misses a proposed WT^, then they need to wait 3 months for that WT^ to hopefully succeed, and then join the new WT^, and wait 3 months for this new WT^ to hopefully succeed. With two, the sidechain can use an accumulation period of 1.5 months, such that no one will ever need to wait more than 4.5 months.
+The following sections assume a maximum of one sucessful withdrawal per sidechain at a time. In other words, as WT^s are proposed, only one can make progress toward the finish line. As a result, a given side-to-main transfer will always take between 3 and 6 months. If there were more simulataneous withdrawals, the worst-case transfer duration would improve.
 
 ![dots-image](https://github.com/drivechain-project/docs/blob/master/images/two-groups.png?raw=true)
 
+The worst-case withdrawal time obeys f(n)=3+(3/n) months, where n is the number of simultaneous withdrawals.
 
-The cost of this is that users are responsible for tracking twice as many withdrawal candidates, and for sounding the alarm if any withdrawal candidate is invalid. This cost is quite severe, as drivechain's security relies on this task being very easy, so as to make for a very convincing threat.
+N=2 is the most desirable choice for several reasons. First, it delievers the greatest marginal benefit (of 1.5 months). Later choices only deliver 0.5 and 0.25 marginal months.
 
-Why two groups, and not some other number? Firstly, the benefits diminish rapidly (with worst-case withdrawal time obeying f(n)=3+(3/n)). With 3 groups the user's waiting time ranges from 3-4 months, and with 4 groups it ranges from 3-3.75. These are gains of 0.5 months and 0.25 months, respectively, comparied to the n=2 gain of 1.5 months. Moreover, the costs are severe, hard-to-estimate, constant in n and eventually accelerating in n. So I believe 2 is the optimal value.
+Second, n=2 can be implemented in a clever way: by allowing a withdrawal to freely advance, if and only if has an ACK-score of 6575 or greater, and if it also has the largest ACK score. In other words, the withdrawal that is furthest along can advance (or retreat) for free, if it has already made it at least halfway to the finish line. With this change, our new M4, is either an "abstain" for the sidechain (in which case nothing happens to any ACK scores), or else it will be in one of two cases: old_M4 + "the largest advances", or new_M4 + "the largest retreats". As a result the number of M4 possibilities (of which the next section is concerned) only increases by a factor of two (instead of exponentially).
 
-Be aware that I have kept the following sections as-is, because it is much easier to first explain and understand the concepts on a per-group basis (ie, with one withdrawal allowed at a time). So I am leaving the following sections as they are. They assume 100 sidechains, 1 group per sidechain, and 1,000 attempts per sidechain. The conclusions of those assumptions apply equally to a world with 50 sidechains, 2 groups per sidechain, and 1,000 attempts per group. It does not strongly affect the conclusions, because the attacker still pays in full for each attempt. But more groups has the same effect as adding more sidechains.
-
+It is possible to troll this rule, by getting two (or even three) withdrawals to have 6575+ ACK scores, and then getting them to *tie* for first place. So, if there are any ties, the ability to "bonus move" is disabled until all ties are broken.
 
 #### How Hard is it to Guess M4?
 
@@ -366,7 +362,7 @@ While we ACK a blinded WT^, what is actually included in the blockchain ("M6") i
 With all of this in place, the only requirements for inclusion in a block are these:
 
 1. "Be ACKed" -- The "blinded TxID" of this txn must be member of the "approved candidate" set in the D2 of this block.
-2. "Return Change to Account" -- TxOut0 must pay {{ see the note above about the payment format being unknown, and replacing CHECKSIG with TRUE }} to the "critical account" (see D1) that corresponds to the CTIP that was selected as a TxIn.
+2. "Return Change to Account" -- TxOut0 must pay to the "critical account" (see D1) that corresponds to the CTIP that was selected as a TxIn.
 3. "Return *all* Change to Account" -- Sum of inputs must equal the sum of outputs. No traditional tx fee is possible.
 
 Finally, don't forget that M6 inherits the requirement (common to both M5 and M6) that the CTIP be selected as an input, and that the CTIP then be updated. In this case, we know that the critical index will be zero, so the new CTIP will be ("this TxID" (NOT blinded), 0). The TxID is NOT blinded because blinding is only for accumulating ACKs.
@@ -420,14 +416,3 @@ Copyright
 ==========
 
 This BIP is licensed under the BSD 2-clause license.
-
-
-
-Open Issues in the Code That Are Worth Special Mention
-=================================================
-
-1. The new concept of "Groups". In particular, double-check that blinding doesn't break anything. (It shouldn't but one never knows for sure.)
-2. Long form M4, and any prep work that might help, for when miners just do their own thing and optimize it all.
-3. The pointless OP CheckSIG -- A solution is needed. A good solution will [a] still be easy for users to track the sidechain's balance; and [b] not produce a pointless signature. See #4.
-4. Other "pointless" fields, such as the sidechain private key and public key. Now that the focus has shifted so much to the CTIP, I'm not sure the extent to which it matters.
-5. Depositing to multiple sidechains at once.
