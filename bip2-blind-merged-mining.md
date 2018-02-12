@@ -91,17 +91,12 @@ Mainchain nodes are going to need this data later, so it must be easy to find. W
 Thus, (for n sidechains) we have a coinbase output with:
 
     1-byte - OP_RETURN (0x6a)
-    1-byte - Push the following (4+(n*35)) bytes (0x??)
+    1-byte - Push the following 36 bytes (0x24)
     4-byte - Message header (0xD3407053)
-    (n*(32+5))-byte - A sequence of bytes, of the three Mini-Header items (h*, prevBlockRef, ChainIndex).
+    32-bytes  - h* side:block hash
+    5~7-bytes - BMM request identifying bytes (0x00bf00) + prevBlockRef & ChainIndex (sidechain mini-header)
 
-( We assume that 5 bytes are used for the Critical Data bytes (non h* parts of the Sidechain Mini-Header). For 256 sidechains, a total of 9,478 bytes [1+1+4+256\*(32+5)] are required, conveniently just below the 10 KB scriptPubKey size limit.)
-
-This data is parsed by laying it in sequential 37-byte chunks (any remaining data --ie, some final chunk that is less than 37 bytes in length-- has no consensus meaning). 
-
-Each 37-byte chunk is then parsed to obtain the data outlined above (in "Description"). If two 35-byte chunks being with the same "Sidechain number" (ie, if the two chunks have the same first byte), then only the first chunk has consensus meaning.
-
-We are left with, at most, one (h*, prevBlockRef) pair per sidechain per block. This data is added directly to D3, a new database.
+There may be only one (h*, prevBlockRef) pair per sidechain per block. This data is added directly to D3, a new database.
 
 #### D3 -- "RecentSidechains_DB"
 
