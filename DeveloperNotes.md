@@ -24,7 +24,7 @@ to http://www.truthcoin.info/blog/blind-merged-mining/ for more information.
 
 ### `SCDB`
 `SCDB` is short for Sidechain Database. The SCDB keeps track of the work score
-of WT^(s) for each sidechain during the current Tau as well as BMM linking data.
+of WT^(s) for each sidechain during the current verification period as well as BMM linking data.
 
 ### `wt`
 `wt` is the name given to an individual withdrawal attempt from the sidechain back to the mainchain.
@@ -37,18 +37,6 @@ into a single transaction that can be verified by the mainchain.
 `B-WT^` is the blinded version (no inputs) of a WT^ that is voted on. Once a B-WT^ has 
 sufficient workscore the WT^ with inputs will be created. The WT^ can be verified by 
 blinding it again.
-
-### `Tau` &tau; 
-`Tau` is used to represent a single round / period of waiting and verification for an individual sidechain.
-The Tau of the testing sidechain (SIDECHAIN_TEST) is 300 for example. The Tau is calculated by the 
-sidechain.GetTau() function in the following way: `return (sidechain.nWaitPeriod + sidechain.nVerificationPeriod);`
-
-During the Tau of a particular sidechain, up to MAX_SIDECHAIN_WTS (3 for now) may be added to SCDB for verification.
-Each sidechain has space for up to MAX_SIDECHAIN_WTS during any single Tau. Note that the Tau for each sidechain may
-be different. After the waiting period portion of the Tau, miners may begin verifying the WT^(s) submitted. At the end
-of a sidechain Tau, if a WT^ has been verified such that it has sufficient workscore it will be paid out on the mainchain.
-At the beginning of the next Tau, the SCDB is blank for that sidechain until a new WT^ is shown to the miners. The SCDB 
-is amnesic to previous Tau periods.
 
 ## RPC 
 ### createcriticaldatatx
